@@ -2,20 +2,22 @@
 
 // import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback, useId } from 'react';
-// import { CloudUploadIcon } from '@/components/svg';
-import { CloudUploadIcon } from 'lucide-react';
-import { exampleImgs, smallModelKey, inputId } from '@/lib/utils/const';
+import { exampleImgs, smallModelKey } from '@/lib/utils/const';
+import { exampleAlts, t, type Lang } from '@/lib/i18n';
 import ImageWithSkeleton from '@/components/ImageWithSkeleton';
 
 export default function SelectImage({
   onChange,
+  lang = 'en',
 }: {
   onChange: (data: File[]) => void;
+  lang?: Lang;
 }) {
   const fileInputId = useId();
   // const fileInputId = useRef(`input-${crypto.randomUUID()}`).current;
   // const fileInputId = inputId;
   const dropRef = useRef<HTMLLabelElement>(null);
+  const [dragging, setDragging] = useState(false);
 
   function clearLocalStorage() {
     if (!!new URLSearchParams(window.location.search).get('debug')) {
@@ -44,16 +46,21 @@ export default function SelectImage({
     function dragOverEvent(e: DragEvent) {
       e.preventDefault();
       drop?.classList.add('drag-over');
+      setDragging(true);
     }
 
     function dragLeaveEvent(e: DragEvent) {
       e.preventDefault();
+      const next = e.relatedTarget;
+      if (next instanceof Node && drop?.contains(next)) return;
       drop?.classList.remove('drag-over');
+      setDragging(false);
     }
 
     function dropEvent(e: DragEvent) {
       e.preventDefault();
       drop?.classList.remove('drag-over');
+      setDragging(false);
       const files = e.dataTransfer?.files;
       handleFiles(files);
     }
@@ -121,7 +128,7 @@ export default function SelectImage({
 
   return (
     <>
-      <div className="glass-effect relative text-sm h-48 xs:h-56 sm:h-60 md:h-64 lg:h-72 xl:h-80 3xl:h-96 m-auto transition-[border-color]">
+      <div className="relative m-auto h-64 text-sm sm:h-72 md:h-80">
         <input
           type="file"
           accept="image/*"
@@ -130,36 +137,28 @@ export default function SelectImage({
           className="opacity-0 h-0"
           onChange={(e) => handleFiles(e.target.files)}
         />
-        {/* <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="w-8 h-8 border-4 border-sky-500 border-t-black/10 border-r-black/10 rounded-full animate-spin"></div>
-            <p className="text-sky-500 mt-4">
-              {isDownloading
-                ? 'Downloading AI model...'
-                : 'Removing background...'}
-            </p>
-          </div> */}
         <label
           ref={dropRef}
           htmlFor={fileInputId}
-          className="drop-zone absolute inset-2 border-2 sm:inset-4 lg:inset-6 sm:border-3 border-dashed border-black/10 dark:border-white/40 rounded-xl flex justify-center items-center cursor-pointer text-center"
+          className="drop-zone absolute inset-0 flex cursor-pointer items-center justify-center border-2 border-dashed text-center"
         >
-          <div>
-            <CloudUploadIcon className="h-8 w-8 m-auto" />
-            <div className="text-sm sm:text-base">
-              <p className="mt-2">Click</p>
-              <p className="my-1">Drag & Drop</p>
-              <p>Paste Image (Ctrl+V/Cmd+V)</p>
-            </div>
+          <div className="bg-[var(--paper)] px-8 py-6">
+            <p className="font-display text-4xl leading-none tracking-tight text-[var(--ink)] sm:text-5xl">
+              {dragging ? t(lang, 'dropRelease') : t(lang, 'dropTitle')}
+            </p>
+            <p className="mt-3 text-sm text-[var(--muted-ink)]">
+              {t(lang, 'dropHint')}
+            </p>
           </div>
         </label>
       </div>
-      <div className="mt-4 block sm:flex items-center">
+      <div className="mt-5 block items-center sm:flex">
         <div
-          className="text-center mb-2 sm:text-start text-sm sm:mr-8 xl:text-lg xl:mr-16"
+          className="mb-3 text-center text-sm text-[var(--muted-ink)] sm:mr-8 sm:mb-0 sm:text-start"
           onClick={clearLocalStorage}
         >
-          <p>Start Removing Backgrounds</p>
-          <p>No image? Try one of these:</p>
+          <p className="text-[var(--ink)]">{t(lang, 'startRemoving')}</p>
+          <p>{t(lang, 'tryExamples')}</p>
         </div>
         <div
           className="relative flex flex-1 justify-around sm:justify-between"
@@ -175,12 +174,12 @@ export default function SelectImage({
               className="absolute ml-5 md:ml-6 inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mb-2"
             ></div>
           </div>
-          {exampleImgs.map(({ src, alt }) => (
+          {exampleImgs.map(({ src }, index) => (
             <ImageWithSkeleton
               key={src}
               src={src}
-              alt={alt}
-              className="w-13 h-13 md:w-16 md:h-16 rounded-md cursor-pointer"
+              alt={exampleAlts[lang][index] || src}
+              className="h-14 w-14 cursor-pointer border border-[var(--line)] object-cover md:h-16 md:w-16"
             />
           ))}
         </div>

@@ -70,7 +70,7 @@ const ConfigSchema = z
             return val;
         }
       }, z.enum(['isnet', 'isnet_fp16', 'isnet_quint8']))
-      .default('isnet_fp16')
+      .default('isnet')
       .optional(),
     mInfo: z
       .object({

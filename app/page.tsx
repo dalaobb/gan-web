@@ -1,16 +1,9 @@
 import type { Metadata } from 'next';
-import AIEdit from '@/components/AIEdit';
+import { pageMetadata } from '@/lib/seo';
+import SitePage from '@/components/SitePage';
 
-const title =
-  'BgGone - Free AI Background Remover. Free, Batch, No Login, No Quality Loss';
-const description =
-  'A free, private background remover that runs entirely in your browser. Upload, drag, or paste images to remove backgrounds using AI — no uploads, no tracking.';
-
-export const metadata: Metadata = {
-  title,
-  description,
-};
+export const metadata: Metadata = pageMetadata('en', 'home');
 
 export default function Home() {
-  return <AIEdit />;
+  return <SitePage lang="en" page="home" />;
 }

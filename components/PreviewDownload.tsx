@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import FileSaver from 'file-saver';
-import { formatFileSize } from '@/lib/utils'
+import { formatFileSize } from '@/lib/utils';
+import { t, type Lang } from '@/lib/i18n';
 import ImgCompareSlider from './ImgCompareSlider';
 import ImgModal from './ImgModal';
 
@@ -10,6 +11,7 @@ export interface IPreviewDownloadProps {
   beforeFile: Blob & { name: string };
   afterFile?: Blob & { name: string };
   processing: boolean;
+  lang?: Lang;
   className?: string;
   onClose: () => void;
 }
@@ -19,6 +21,7 @@ export default function PreviewDownload({
   afterFile,
   className,
   processing,
+  lang = 'en',
   onClose,
 }: IPreviewDownloadProps) {
   const [beforeSrc, setBeforeSrc] = useState<string>();
@@ -75,39 +78,32 @@ export default function PreviewDownload({
         beforeSrc={beforeSrc}
         afterSrc={afterSrc}
         processing={processing}
+        lang={lang}
         onClose={onClose}
       />
       <div className="p-4">
         <h3 className="font-semibold text-sm mb-2 truncate">
           {beforeFile.name}
         </h3>
-        <p className="text-black/80 dark:text-white/80 text-xs mb-3 flex justify-between">
+        <p className="mb-3 flex justify-between text-xs text-[var(--muted-ink)]">
           <span>{formatFileSize(beforeFile.size)}</span>
           {afterFile?.size && (
-            <span>After: {formatFileSize(afterFile.size)}</span>
+            <span>
+              {t(lang, 'after')} {formatFileSize(afterFile.size)}
+            </span>
           )}
         </p>
-        <div className="flex gap-8">
-          <button
-            onClick={preview}
-            // className="flex-1 px-3 py-2 rounded-lg text-sm/6 font-semibold text-gray-950 ring-1 ring-gray-950/10 hover:ring-gray-950/20  transition-all"
-            className="flex-1 px-3 py-2 bg-sky-600 text-white rounded-lg text-sm hover:bg-sky-700 transition-all"
-          >
-            Preview
+        <div className="flex gap-2">
+          <button onClick={preview} className="btn btn-line flex-1">
+            {t(lang, 'preview')}
           </button>
           {!!afterSrc && (
             <>
-              <button
-                onClick={copyFile}
-                className="flex-1 px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-all"
-              >
-                {copied ? '✅ Copied!' : 'Copy'}
+              <button onClick={copyFile} className="btn btn-line flex-1">
+                {copied ? t(lang, 'copied') : t(lang, 'copy')}
               </button>
-              <button
-                onClick={saveFile}
-                className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-all"
-              >
-                Save
+              <button onClick={saveFile} className="btn btn-solid flex-1">
+                {t(lang, 'save')}
               </button>
             </>
           )}

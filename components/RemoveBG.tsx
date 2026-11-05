@@ -8,11 +8,13 @@ import { smallModelKey } from '@/lib/utils/const';
 import { removeBackground } from '@/lib/utils/remover';
 import { isMobileDevice } from '@/lib/utils/remover/utils';
 import { ImageType } from '@/lib/types';
+import { t, type Lang } from '@/lib/i18n';
 import PreviewDownload from '@/components/PreviewDownload';
 import SelectImage from '@/components/SelectImage';
-import { Select2 } from '@/components/ui/select';
 
-export default function RemoveBg() {
+const MODEL_CDN = 'https://cdn.bgg.one/remove-bg/model/1.5.3/';
+
+export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [outOfMemory, setOutOfMemory] = useState(false);
@@ -64,9 +66,9 @@ export default function RemoveBg() {
         setImgSliders([...imgSliders]);
         const output = await removeBackground(file, {
           device: 'gpu',
-          // publicPath: `${location.origin}/_models/release/`,
+          publicPath: MODEL_CDN,
+          proxyToWorker: true,
           progress: (key, current, total) => {
-            // console.log(`Downloading ${key}: ${current} of ${total}`);
             if (
               typeof current === 'number' &&
               (current === total || total < 8)
@@ -76,11 +78,10 @@ export default function RemoveBg() {
               setIsDownloading(true);
             }
           },
-          model: isMobile ? 'isnet_quint8' : 'isnet_fp16',
+          model: isMobile ? 'isnet_quint8' : 'isnet',
           ...(model
             ? {
                 mInfo: {
-                  // modelUrl: `/_models/${model}`,
                   modelUrl: `https://cdn.bgg.one/remove-bg/model/${model}`,
                   size: 320,
                   inputKey: 'input.1',
@@ -92,7 +93,7 @@ export default function RemoveBg() {
             !!new URLSearchParams(window.location.search).get('debug'),
           output: {
             format,
-            quality: isMobile ? 0.4 : 0.6,
+            quality: isMobile ? 0.4 : 1,
           },
         });
         item.status = 'fulfilled';
@@ -119,7 +120,7 @@ export default function RemoveBg() {
 
     const duringTime = performance.now() - startTime;
     setTime(formatTime(duringTime));
-  }, [isLoading, imgSliders, format]);
+  }, [isLoading, imgSliders, format, lang]);
 
   const imgs = imgSliders
     ?.filter((it) => !!it.afterFile)
@@ -146,89 +147,70 @@ export default function RemoveBg() {
       FileSaver.saveAs(content, 'BgGone.zip');
     } catch (err) {
       console.error(err);
-      alert('Failed to package images.');
+      alert(t(lang, 'failedPackage'));
     }
   };
 
   return (
     <>
       <div className="main-width">
-        <SelectImage onChange={handleFiles} />
+        <SelectImage lang={lang} onChange={handleFiles} />
       </div>
-      <div className="main-width text-yellow-500 flex justify-center items-center text-sm md:justify-start md:text-base h-7 md:h-8">
-        {wasmOnnxModel && (
-          <span>Notice: You’re using a lightweight model.</span>
-        )}
+      <div className="main-width mt-2 flex h-7 items-center text-sm text-[var(--muted-ink)] md:h-8">
+        {wasmOnnxModel && <span>{t(lang, 'noticeLightModel')}</span>}
       </div>
       {!!imgSliders?.length && (
         <div>
-          <div className="glass-effect p-4 main-width">
+          <div className="glass-effect main-width p-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="text-black/90 dark:text-white/90 flex items-center gap-4">
-                <span className="font-semibold">
-                  Selected: <span>{imgSliders?.length}</span>
+              <div className="flex items-center gap-4 text-sm">
+                <span>
+                  {t(lang, 'selected')} <span>{imgSliders?.length}</span>
                 </span>
                 <div className="flex items-center gap-2">
-                  <label>Output format:</label>
-                  <Select2
-                    defaultValue={ImageType.PNG}
-                    className="w-32"
-                    placeholder="Select output format"
-                    items={Object.values(ImageType).map((t) => ({
-                      label: t,
-                      value: t,
-                    }))}
-                    value={format}
-                    onChange={(v) => setFormat(v as ImageType)}
-                  />
-                  {/* <select
-                    className="px-3 py-1 rounded-lg bg-white/20 border border-black/30"
+                  <label>{t(lang, 'outputFormat')}</label>
+                  <select
+                    className="border border-[var(--line)] bg-[var(--paper)] px-2 py-1"
                     value={format}
                     onChange={(e) => setFormat(e.target.value as ImageType)}
                   >
-                    {Object.values(ImageType).map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select> */}
+                    <option value={ImageType.PNG}>PNG</option>
+                    <option value={ImageType.WEBP}>WebP</option>
+                  </select>
                 </div>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-2">
                 <button
                   disabled={isLoading}
                   onClick={remove}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all transform hover:scale-105 shadow-lg"
+                  className="btn btn-solid"
                 >
                   {isDownloading
-                    ? 'Loading...'
+                    ? t(lang, 'loading')
                     : isLoading
-                    ? 'Removing...'
-                    : 'Start'}
+                      ? t(lang, 'removing')
+                      : t(lang, 'start')}
                 </button>
                 <button
                   disabled={isLoading}
                   onClick={() => setImgSliders([])}
-                  className="px-4 py-2 bg-pink-600 text-white rounded-lg font-semibold hover:bg-pink-700 transition-all transform hover:scale-105"
+                  className="btn btn-line"
                 >
-                  Clear
+                  {t(lang, 'clear')}
                 </button>
               </div>
             </div>
           </div>
-          <div className="main-width text-rose-600 rounded-md pt-2 pb-6 md:text-lg">
+          <div className="main-width pt-2 pb-6 text-sm text-[#9f2d2d]">
             {outOfMemory && (
               <>
-                <span>
-                  ⚠️ Your device may struggle with this task. Try using a
-                  desktop for better results.
-                </span>
+                <span>{t(lang, 'oomWarning')}</span>
                 {!wasmOnnxModel && (
                   <button
                     onClick={changeModel}
-                    className="mt-2 block w-full text-center py-3 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-all"
+                    className="btn btn-solid mt-2 w-full"
                   >
-                    Try a smaller model?
+                    {t(lang, 'trySmallerModel')}
                   </button>
                 )}
               </>
@@ -238,7 +220,8 @@ export default function RemoveBg() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-3 main-max-width">
             {imgSliders?.map(({ beforeFile, afterFile, status }, index) => (
               <PreviewDownload
-                className="break-inside-avoid mb-5 image-card border border-gray-200"
+                lang={lang}
+                className="image-card mb-5 break-inside-avoid border border-[var(--line)]"
                 key={beforeFile.name + (afterFile?.name || '')}
                 beforeFile={beforeFile}
                 afterFile={afterFile}
@@ -250,26 +233,18 @@ export default function RemoveBg() {
             ))}
           </div>
           <div
-            className={`main-width glass-effect p-6 mt-4 ${
+            className={`glass-effect main-width mt-4 p-6 ${
               isDone ? 'block' : 'hidden'
             }`}
           >
             <div className="text-center">
-              <h3 className="text-2xl font-semibold mb-4">
-                🎉 Done! Time taken: {time}
-              </h3>
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={downloadSingle}
-                  className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold hover:from-purple-600 hover:to-pink-600 transition-all transform hover:scale-105 shadow-lg"
-                >
-                  Download
+              <h3 className="mb-4 text-2xl">{t(lang, 'done', { time })}</h3>
+              <div className="flex justify-center gap-2">
+                <button onClick={downloadSingle} className="btn btn-solid">
+                  {t(lang, 'download')}
                 </button>
-                <button
-                  onClick={downloadAll}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 shadow-lg"
-                >
-                  Download All as ZIP
+                <button onClick={downloadAll} className="btn btn-line">
+                  {t(lang, 'downloadAllZip')}
                 </button>
               </div>
             </div>

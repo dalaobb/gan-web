@@ -8,27 +8,31 @@
 
 import createMDX from '@next/mdx';
 
+const isolatedHeaders = [
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Configure `pageExtensions` to include markdown and MDX files
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
-  // Optionally, add any other Next.js config below
+  trailingSlash: true,
+  agentRules: false,
+
+  async redirects() {
+    return [
+      { source: '/removebg', destination: '/', permanent: true },
+      { source: '/removebg/', destination: '/', permanent: true },
+    ];
+  },
 
   async headers() {
     return [
-      {
-        source: '/removebg',
-        headers: [
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin',
-          },
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
-          },
-        ],
-      },
+      ...['/', '/zh', '/zh/'].map((source) => ({
+        source,
+        headers: isolatedHeaders,
+      })),
       {
         source: '/_models/:path*', // *
         headers: [

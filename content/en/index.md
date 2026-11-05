@@ -1,20 +1,18 @@
-## ✨ BgGone
+## BgGone
 
-**Privacy-First:** Everything is processed locally in your browser.
+**BgGone (bgg.one)** is the free AI background remover: remove image backgrounds instantly with one click — no uploads, no login, no watermarks.
 
-Remove backgrounds from multiple images with one click. No uploads. No logins. No limits.
+Need batch background removal? Process multiple images at once. Everything runs locally in your browser, so your photos stay private at full quality. Drag & drop, paste, or upload images and watch the background be gone in seconds.
 
-Effortless AI-powered background remover. Drag & drop, paste, or upload multiple images. 100% free and privacy-first.
-
-## ⚙️ How It Works
-1. **Upload or Paste Images.** 
+## How It Works
+1. **Upload or Paste Images.**
 Select multiple images from your device, paste them from your clipboard, or drag and drop them onto the page.
 1. **Let AI Do the Work.**
 Our advanced AI instantly removes backgrounds from all your images. No waiting. No internet required.
 1. **Download Transparent PNGs**.
 Download clean, high-resolution images with transparent backgrounds — ready to use for any project.
 
-## 🚀 Why Use This Background Remover?
+## Why Use This Background Remover?
 1. **Batch Background Removal.**
 Upload and process multiple images at once — ideal for product photos, profile pictures, and e-commerce.
 1. **Runs Entirely in Your Browser.**
@@ -28,19 +26,19 @@ Keep full resolution. No compression or size limits.
 1. **Powered by AI.**
 Lightning-fast, accurate background removal with a single click.
 
-## 🧩 Who Is It For?
+## Who Is It For?
 - Creators and designers
 - Online sellers and marketers
 - Profile picture perfectionists
 - Anyone who wants clean, transparent images
 
-## 🖼️ What You Can Do?
+## What You Can Do?
 - Remove backgrounds from product photos
 - Clean up profile pictures
 - Isolate subjects from cluttered scenes
 - Prepare images for design, e-commerce, and social media
 
-## 💬 What Makes This Tool Different?
+## What Makes This Tool Different?
 Unlike other background removal tools, this one:
 
 - Respects your privacy — processes all images locally
@@ -48,7 +46,13 @@ Unlike other background removal tools, this one:
 - Handles multiple images — in a single batch
 - Costs nothing — no usage limits or paywalls
 
-## 💡 FAQ
+## FAQ
+### Do I need to log in or create an account?
+No. BgGone needs no login and no signup — just open the page and start removing backgrounds.
+
+### Is BgGone really free?
+Yes, 100% free. No subscriptions, no watermarks, and no hidden limits on background removal.
+
 ### Why is the first processing slow?
 On the first run, the necessary data (~80MB) will be fetched and stored in the browser cache. Subsequent processing will be much faster.
 
@@ -68,6 +72,6 @@ We support common image formats including JPG, PNG, WEBP, and AVIF.
 ### Is there an image size limit?
 For optimal performance and browser stability, we recommend images under 10MB. Larger images may still work but could affect processing speed.
 
-## ✅ Try It Now — No Login Needed
+## Try It Now — No Login Needed
 Drop your images and watch the backgrounds vanish.
 No uploads, no nonsense — just results.

@@ -1,16 +1,19 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
+import { t, type Lang } from '@/lib/i18n';
 
 export default function ImgCompareSlider({
   beforeSrc,
   afterSrc,
   processing,
+  lang = 'en',
   onClose,
 }: {
   beforeSrc?: string;
   afterSrc?: string;
   processing?: boolean;
+  lang?: Lang;
   onClose: () => void;
 }) {
   const imgContainerRef = useRef<HTMLDivElement>(null);
@@ -44,7 +47,7 @@ export default function ImgCompareSlider({
         'style',
         `clip-path: inset(0 ${rightPercent}% 0 0);`
       );
-      slider.setAttribute('style', 'left:' + leftPercent + '%;');
+      slider.style.left = leftPercent + '%';
     }
 
     imgContainer.addEventListener('touchmove', touchmoveEvent, {
@@ -63,7 +66,7 @@ export default function ImgCompareSlider({
         'style',
         `clip-path: inset(0 ${rightPercent}% 0 0);`
       );
-      slider.setAttribute('style', 'left:' + leftPercent + '%;');
+      slider.style.left = leftPercent + '%';
       // }
     }
     imgContainer.addEventListener('mousemove', mousemoveEvent);
@@ -94,17 +97,9 @@ export default function ImgCompareSlider({
             src={afterSrc}
             alt="After | BgGone - Free AI Background Remover"
           />
-          <div
-            ref={sliderRef}
-            className="bg-white/20 backdrop-blur-md
-            h-11 w-11 absolute z-1 left-1/2 top-1/2 ml-[-22px] mt-[-22px] border-2 border-white rounded-full 
-            shadow-[0 0 10px rgb(12, 12, 12)] pointer-events-none 
-            before:content-[' '] before:block before:w-0.5 before:bg-white before:h-[9999px] before:absolute before:left-1/2 before:ml-[-1px] before:bottom-1/2 before:mb-[22px] before:shadow-[0 0 10px rgb(12, 12, 12)]
-            after:content-[' '] after:block after:w-0.5 after:bg-white after:h-[9999px] after:absolute after:left-1/2 after:ml-[-1px] after:top-1/2 after:mt-[22px] after:shadow-[0 0 5px rgb(12, 12, 12)]
-        "
-          >
-            <span className="w-0 h-0 border-6 border-solid border-transparent absolute top-1/2 -mt-[6px] border-r-white left-1/2 ml-[-17px]"></span>
-            <span className="w-0 h-0 border-6 border-solid border-transparent absolute top-1/2 -mt-[6px] border-l-white right-1/2 mr-[-17px]"></span>
+          <div ref={sliderRef} className="compare-handle backdrop-blur-md">
+            <span className="compare-handle-arrow compare-handle-arrow-left" />
+            <span className="compare-handle-arrow compare-handle-arrow-right" />
           </div>
         </>
       ) : null}
@@ -121,18 +116,18 @@ export default function ImgCompareSlider({
 
       {processing ? (
         <div
-          className={`absolute inset-0 bg-black/50 items-center justify-center flex`}
+          className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--paper)_72%,transparent)]"
         >
-          <div className="text-white text-center">
-            <div className="inline-block w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mb-2"></div>
-            <p>Processing...</p>
+          <div className="text-center text-[var(--ink)]">
+            <div className="mb-2 inline-block h-5 w-5 animate-spin rounded-full border border-[var(--line)] border-t-[var(--ink)]"></div>
+            <p>{t(lang, 'processing')}</p>
           </div>
         </div>
       ) : (
         <div className="absolute top-3 right-3">
           <button
             onClick={onClose}
-            className="w-8 h-8 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition-all"
+            className="flex h-7 w-7 items-center justify-center border border-[var(--line)] bg-[var(--paper)] text-[var(--ink)]"
           >
             ×
           </button>

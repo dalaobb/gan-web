@@ -31,7 +31,7 @@ export default function SitePage({
         <h1 className="text-4xl sm:text-[2.75rem] leading-tight">
           {copy.pageTitle}
         </h1>
-        <p className="mt-3 text-base text-[var(--muted-ink)]">
+        <p className="mt-3 text-base text-(--muted-ink)">
           {copy.secondTitle}
         </p>
       </header>

@@ -9,6 +9,8 @@ import { removeBackground } from '@/lib/utils/remover';
 import { isMobileDevice } from '@/lib/utils/remover/utils';
 import { ImageType } from '@/lib/types';
 import { t, type Lang } from '@/lib/i18n';
+import { paintBackground, type Backdrop } from '@/lib/utils/background';
+import BackgroundPicker from '@/components/BackgroundPicker';
 import PreviewDownload from '@/components/PreviewDownload';
 import SelectImage from '@/components/SelectImage';
 
@@ -26,6 +28,10 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
     }[]
   >();
   const [format, setFormat] = useState<ImageType>(ImageType.PNG);
+  const [backdrop, setBackdrop] = useState<Backdrop>({ type: 'transparent' });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [time, setTime] = useState('');
   const [wasmOnnxModel, setWasmOnnxModel] = useState(false);
 
@@ -33,6 +39,14 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
     const model = window.localStorage.getItem(smallModelKey);
     setWasmOnnxModel(!!model);
   }, []);
+
+  useEffect(() => {
+    if (!imageFile) return;
+    const url = URL.createObjectURL(imageFile);
+    setImageUrl(url);
+    setBackdrop({ type: 'image', url });
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
 
   function changeModel() {
     const model = 'u2netp.onnx';
@@ -127,27 +141,46 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
     ?.map((it) => it.afterFile);
   const isDone = !isLoading && !!imgs?.length;
 
-  const downloadSingle = () => {
-    if (!isDone) return;
+  const filesToSave = useCallback(async () => {
+    const ready = (imgs ?? []).filter((file): file is Blob & { name: string } => !!file);
+    if (backdrop.type === 'transparent') return ready;
+    return Promise.all(
+      ready.map(async (file) =>
+        Object.assign(await paintBackground(file, backdrop), { name: file.name })
+      )
+    );
+  }, [imgs, backdrop]);
 
-    for (let file of imgs) {
-      FileSaver.saveAs(file!, file!.name);
+  const downloadSingle = async () => {
+    if (!isDone || saving) return;
+    setSaving(true);
+    try {
+      for (const file of await filesToSave()) {
+        FileSaver.saveAs(file, file.name);
+      }
+    } catch (err) {
+      console.error(err);
+      alert(t(lang, 'bgFailed'));
+    } finally {
+      setSaving(false);
     }
   };
 
   const downloadAll = async () => {
-    if (!isDone) return;
-
+    if (!isDone || saving) return;
+    setSaving(true);
     try {
       const zip = new JSZip();
-      imgs.forEach((file) => {
-        zip.file(file!.name, file!);
-      });
+      for (const file of await filesToSave()) {
+        zip.file(file.name, file);
+      }
       const content = await zip.generateAsync({ type: 'blob' });
       FileSaver.saveAs(content, 'BgGone.zip');
     } catch (err) {
       console.error(err);
       alert(t(lang, 'failedPackage'));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -156,7 +189,7 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
       <div className="main-width">
         <SelectImage lang={lang} onChange={handleFiles} />
       </div>
-      <div className="main-width mt-2 flex h-7 items-center text-sm text-[var(--muted-ink)] md:h-8">
+      <div className="main-width mt-2 flex h-7 items-center text-sm text-(--muted-ink) md:h-8">
         {wasmOnnxModel && <span>{t(lang, 'noticeLightModel')}</span>}
       </div>
       {!!imgSliders?.length && (
@@ -170,7 +203,7 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
                 <div className="flex items-center gap-2">
                   <label>{t(lang, 'outputFormat')}</label>
                   <select
-                    className="border border-[var(--line)] bg-[var(--paper)] px-2 py-1"
+                    className="border border-(--line) bg-(--paper) px-2 py-1"
                     value={format}
                     onChange={(e) => setFormat(e.target.value as ImageType)}
                   >
@@ -200,6 +233,15 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
                 </button>
               </div>
             </div>
+            <div className="mt-4 border-t border-(--line) pt-4">
+                <BackgroundPicker
+                  lang={lang}
+                  value={backdrop}
+                  imageUrl={imageUrl}
+                  onChange={setBackdrop}
+                  onImage={setImageFile}
+                />
+              </div>
           </div>
           <div className="main-width pt-2 pb-6 text-sm text-[#9f2d2d]">
             {outOfMemory && (
@@ -221,10 +263,11 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
             {imgSliders?.map(({ beforeFile, afterFile, status }, index) => (
               <PreviewDownload
                 lang={lang}
-                className="image-card mb-5 break-inside-avoid border border-[var(--line)]"
+                className="image-card mb-5 break-inside-avoid border border-(--line)"
                 key={beforeFile.name + (afterFile?.name || '')}
                 beforeFile={beforeFile}
                 afterFile={afterFile}
+                backdrop={backdrop}
                 processing={status === 'processing'}
                 onClose={() =>
                   setImgSliders(imgSliders.filter((_, i) => i !== index))
@@ -240,10 +283,18 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
             <div className="text-center">
               <h3 className="mb-4 text-2xl">{t(lang, 'done', { time })}</h3>
               <div className="flex justify-center gap-2">
-                <button onClick={downloadSingle} className="btn btn-solid">
+                <button
+                  onClick={downloadSingle}
+                  disabled={saving}
+                  className="btn btn-solid"
+                >
                   {t(lang, 'download')}
                 </button>
-                <button onClick={downloadAll} className="btn btn-line">
+                <button
+                  onClick={downloadAll}
+                  disabled={saving}
+                  className="btn btn-line"
+                >
                   {t(lang, 'downloadAllZip')}
                 </button>
               </div>

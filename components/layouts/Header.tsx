@@ -7,7 +7,7 @@ import type { Lang } from '@/lib/i18n';
 export default function Header({ lang }: { lang: Lang }) {
   return (
     <header>
-      <nav className="flex justify-between items-center h-14 border-b border-[var(--line)]">
+      <nav className="flex justify-between items-center h-14 border-b border-(--line)">
         <Navigation lang={lang} />
         <div className="flex items-center gap-2">
           <LanguageSwitch lang={lang} />

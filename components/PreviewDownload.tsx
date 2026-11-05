@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react';
 import FileSaver from 'file-saver';
 import { formatFileSize } from '@/lib/utils';
 import { t, type Lang } from '@/lib/i18n';
+import {
+  backdropStyle,
+  paintBackground,
+  type Backdrop,
+} from '@/lib/utils/background';
 import ImgCompareSlider from './ImgCompareSlider';
 import ImgModal from './ImgModal';
 
@@ -12,6 +17,7 @@ export interface IPreviewDownloadProps {
   afterFile?: Blob & { name: string };
   processing: boolean;
   lang?: Lang;
+  backdrop?: Backdrop;
   className?: string;
   onClose: () => void;
 }
@@ -22,33 +28,62 @@ export default function PreviewDownload({
   className,
   processing,
   lang = 'en',
+  backdrop = { type: 'transparent' },
   onClose,
 }: IPreviewDownloadProps) {
   const [beforeSrc, setBeforeSrc] = useState<string>();
   const [afterSrc, setAfterSrc] = useState<string>();
+  const [composited, setComposited] = useState<
+    (Blob & { name: string }) | null
+  >(null);
   const [show, setShow] = useState(false);
   const [copied, setCopied] = useState(false);
+  const shownFile =
+    backdrop.type !== 'transparent' && composited ? composited : afterFile;
+  const frameStyle =
+    backdrop.type !== 'transparent' && !composited
+      ? backdropStyle(backdrop)
+      : undefined;
 
   function preview() {
     setShow(true);
   }
 
-  async function copyFile() {
+  async function resultFile() {
     if (!afterFile) return;
+    if (backdrop.type === 'transparent') return afterFile;
+    if (composited) return composited;
+    try {
+      return Object.assign(await paintBackground(afterFile, backdrop), {
+        name: afterFile.name,
+      });
+    } catch (err) {
+      console.error(err);
+      alert(t(lang, 'bgFailed'));
+    }
+  }
 
-    const clipboardItem = new ClipboardItem({
-      [afterFile.type]: afterFile,
-    });
-    await navigator.clipboard.write([clipboardItem]);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
-    console.log('good');
+  async function copyFile() {
+    const file = await resultFile();
+    if (!file) return;
+
+    try {
+      const clipboardItem = new ClipboardItem({
+        [file.type]: file,
+      });
+      await navigator.clipboard.write([clipboardItem]);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch (err) {
+      console.error(err);
+      alert(t(lang, 'bgFailed'));
+    }
   }
 
   async function saveFile() {
-    if (!afterFile) return;
-
-    FileSaver.saveAs(afterFile, afterFile.name);
+    const file = await resultFile();
+    if (!file) return;
+    FileSaver.saveAs(file, file.name);
   }
 
   useEffect(() => {
@@ -61,15 +96,39 @@ export default function PreviewDownload({
   }, [beforeFile]);
 
   useEffect(() => {
-    if (!afterFile) return;
+    if (!afterFile || backdrop.type === 'transparent') {
+      setComposited(null);
+      return;
+    }
+    let cancelled = false;
+    setComposited(null);
+    const cutout = afterFile;
+    const choice = backdrop;
+    paintBackground(cutout, choice)
+      .then((blob) => {
+        if (!cancelled) {
+          setComposited(Object.assign(blob, { name: cutout.name }));
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!cancelled) setComposited(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [afterFile, backdrop]);
 
-    const url = URL.createObjectURL(afterFile);
+  useEffect(() => {
+    if (!shownFile) return;
+
+    const url = URL.createObjectURL(shownFile);
     setAfterSrc(url);
 
     return () => {
       URL.revokeObjectURL(url);
     };
-  }, [afterFile]);
+  }, [shownFile]);
   return (
     <div
       className={`glass-effect ${processing ? 'processing' : ''} ${className}`}
@@ -79,17 +138,20 @@ export default function PreviewDownload({
         afterSrc={afterSrc}
         processing={processing}
         lang={lang}
+        backdrop={
+          frameStyle ? backdrop : { type: 'transparent' }
+        }
         onClose={onClose}
       />
       <div className="p-4">
         <h3 className="font-semibold text-sm mb-2 truncate">
           {beforeFile.name}
         </h3>
-        <p className="mb-3 flex justify-between text-xs text-[var(--muted-ink)]">
+        <p className="mb-3 flex justify-between text-xs text-(--muted-ink)">
           <span>{formatFileSize(beforeFile.size)}</span>
-          {afterFile?.size && (
+          {shownFile?.size && (
             <span>
-              {t(lang, 'after')} {formatFileSize(afterFile.size)}
+              {t(lang, 'after')} {formatFileSize(shownFile.size)}
             </span>
           )}
         </p>
@@ -113,6 +175,7 @@ export default function PreviewDownload({
         <ImgModal
           isVisible={show}
           url={afterSrc || beforeSrc}
+          imgStyle={frameStyle}
           onClose={() => setShow(false)}
         />
       )}

@@ -2,18 +2,21 @@
 
 import { useRef, useEffect } from 'react';
 import { t, type Lang } from '@/lib/i18n';
+import { backdropStyle, type Backdrop } from '@/lib/utils/background';
 
 export default function ImgCompareSlider({
   beforeSrc,
   afterSrc,
   processing,
   lang = 'en',
+  backdrop = { type: 'transparent' },
   onClose,
 }: {
   beforeSrc?: string;
   afterSrc?: string;
   processing?: boolean;
   lang?: Lang;
+  backdrop?: Backdrop;
   onClose: () => void;
 }) {
   const imgContainerRef = useRef<HTMLDivElement>(null);
@@ -85,15 +88,8 @@ export default function ImgCompareSlider({
       {showAfter ? (
         <>
           <img
-            className="w-full h-full object-cover"
-            style={{
-              backgroundImage: `linear-gradient(45deg, #ccc 25%, transparent 25%),
-                            linear-gradient(-45deg, #ccc 25%, transparent 25%),
-                            linear-gradient(45deg, transparent 75%, #ccc 75%),
-                            linear-gradient(-45deg, transparent 75%, #ccc 75%)`,
-              backgroundSize: `20px 20px`,
-              backgroundPosition: `0 0, 0 10px, 10px -10px, -10px 0px`,
-            }}
+            className="checker w-full h-full object-cover"
+            style={backdropStyle(backdrop)}
             src={afterSrc}
             alt="After | BgGone - Free AI Background Remover"
           />
@@ -118,8 +114,8 @@ export default function ImgCompareSlider({
         <div
           className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--paper)_72%,transparent)]"
         >
-          <div className="text-center text-[var(--ink)]">
-            <div className="mb-2 inline-block h-5 w-5 animate-spin rounded-full border border-[var(--line)] border-t-[var(--ink)]"></div>
+          <div className="text-center text-(--ink)">
+            <div className="mb-2 inline-block h-5 w-5 animate-spin rounded-full border border-(--line) border-t-(--ink)"></div>
             <p>{t(lang, 'processing')}</p>
           </div>
         </div>
@@ -127,7 +123,7 @@ export default function ImgCompareSlider({
         <div className="absolute top-3 right-3">
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center border border-[var(--line)] bg-[var(--paper)] text-[var(--ink)]"
+            className="flex h-7 w-7 items-center justify-center border border-(--line) bg-(--paper) text-(--ink)"
           >
             ×
           </button>

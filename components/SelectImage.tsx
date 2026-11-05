@@ -142,11 +142,11 @@ export default function SelectImage({
           htmlFor={fileInputId}
           className="drop-zone absolute inset-0 flex cursor-pointer items-center justify-center border-2 border-dashed text-center"
         >
-          <div className="bg-[var(--paper)] px-8 py-6">
-            <p className="font-display text-4xl leading-none tracking-tight text-[var(--ink)] sm:text-5xl">
+          <div className="bg-(--paper) px-8 py-6">
+            <p className="font-display text-4xl leading-none tracking-tight text-(--ink) sm:text-5xl">
               {dragging ? t(lang, 'dropRelease') : t(lang, 'dropTitle')}
             </p>
-            <p className="mt-3 text-sm text-[var(--muted-ink)]">
+            <p className="mt-3 text-sm text-(--muted-ink)">
               {t(lang, 'dropHint')}
             </p>
           </div>
@@ -154,10 +154,10 @@ export default function SelectImage({
       </div>
       <div className="mt-5 block items-center sm:flex">
         <div
-          className="mb-3 text-center text-sm text-[var(--muted-ink)] sm:mr-8 sm:mb-0 sm:text-start"
+          className="mb-3 text-center text-sm text-(--muted-ink) sm:mr-8 sm:mb-0 sm:text-start"
           onClick={clearLocalStorage}
         >
-          <p className="text-[var(--ink)]">{t(lang, 'startRemoving')}</p>
+          <p className="text-(--ink)">{t(lang, 'startRemoving')}</p>
           <p>{t(lang, 'tryExamples')}</p>
         </div>
         <div
@@ -179,7 +179,7 @@ export default function SelectImage({
               key={src}
               src={src}
               alt={exampleAlts[lang][index] || src}
-              className="h-14 w-14 cursor-pointer border border-[var(--line)] object-cover md:h-16 md:w-16"
+              className="h-14 w-14 cursor-pointer border border-(--line) object-cover md:h-16 md:w-16"
             />
           ))}
         </div>

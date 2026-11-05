@@ -83,8 +83,8 @@ export function Divider({
             'mx-3',
             'inline-flex items-center',
             // 使用背景变量，兼容 shadcn 的 light/dark
-            // bg-[var(--background)] 会覆盖线条从而产生断开的中间区域（看起来像 Ant Divider）
-            // 'bg-[var(--background)] dark:bg-[var(--background)]',
+            // bg-(--background) 会覆盖线条从而产生断开的中间区域（看起来像 Ant Divider）
+            // 'bg-(--background) dark:bg-(--background)',
             textBgClass
           )}
         >

@@ -9,7 +9,7 @@ export default function LanguageSwitch({ lang }: { lang: Lang }) {
   const zhHref = localizedPath('zh', pathname);
 
   return (
-    <div className="flex items-center gap-2 text-sm text-[var(--muted-ink)]">
+    <div className="flex items-center gap-2 text-sm text-(--muted-ink)">
       <a
         href={enHref}
         hrefLang="en"
@@ -22,7 +22,7 @@ export default function LanguageSwitch({ lang }: { lang: Lang }) {
           }
         }}
         className={
-          lang === 'en' ? 'text-[var(--ink)]' : 'hover:text-[var(--ink)]'
+          lang === 'en' ? 'text-(--ink)' : 'hover:text-(--ink)'
         }
       >
         EN
@@ -40,7 +40,7 @@ export default function LanguageSwitch({ lang }: { lang: Lang }) {
           }
         }}
         className={
-          lang === 'zh' ? 'text-[var(--ink)]' : 'hover:text-[var(--ink)]'
+          lang === 'zh' ? 'text-(--ink)' : 'hover:text-(--ink)'
         }
       >
         中文

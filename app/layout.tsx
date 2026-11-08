@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Newsreader, Source_Sans_3 } from 'next/font/google';
 import { GoogleAnalytics } from '@next/third-parties/google';
-import { SessionProvider } from 'next-auth/react';
 import { headers } from 'next/headers';
 
 import ErrorHandlerProvider from '@/components/layouts/ErrorHandlerProvider';
@@ -80,11 +79,9 @@ export default async function RootLayout({
         className="antialiased px-4 sm:px-6"
       >
         <ErrorHandlerProvider>
-          <SessionProvider>
-            <Header lang={lang} />
-            <main>{children}</main>
-            <Footer />
-          </SessionProvider>
+          <Header lang={lang} />
+          <main>{children}</main>
+          <Footer />
         </ErrorHandlerProvider>
         <script
           type="application/ld+json"

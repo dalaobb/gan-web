@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { fal } from '@fal-ai/client';
+import type { AuthSession } from '@/lib/auth';
 import { ok, fail } from '@/lib/services/apiRes';
 import withAuth from '@/lib/services/withAuth';
 import { ModelId } from '@/lib/types/fal';
@@ -8,12 +9,21 @@ import { MODELS_MAP } from '../models/route';
 import { MAX_FILES, IMAGE_MAX_SIZE } from '@/lib/utils/const';
 import { mockDelay } from '@/lib/utils';
 import promptMap, { PromptsKey } from '@/lib/db/prompt';
+import { db } from '@/lib/db';
+import { generations } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import {
+  IMAGE_CREDITS,
+  InsufficientCreditsError,
+  refundCredits,
+  reserveCredits,
+} from '@/lib/credits';
 
 fal.config({
   credentials: process.env.FAL_KEY as string,
 });
 
-export const POST = withAuth(async (req: NextRequest) => {
+export const POST = withAuth(async (req: NextRequest, _ctx: unknown, session: AuthSession) => {
   const { searchParams } = new URL(req.url);
   const isMock = !!searchParams.get('mock');
   const contentType = req.headers.get('content-type');
@@ -93,24 +103,72 @@ export const POST = withAuth(async (req: NextRequest) => {
       });
     }
 
-    // 提交异步任务，立即返回任务ID
-    const { request_id } = await fal.queue.submit(model, {
-      input: {
-        prompt,
-        image_urls,
-        // width,
-        // height,
-        // num_inference_steps,
-        // guidance_scale,
-        // seed,
-      },
-      webhookUrl: `${process.env.NEXT_PUBLIC_API_BASE}/ai/webhook`,
+    const userId = session.user?.id;
+    if (!userId) return fail(401);
+
+    const generationId = crypto.randomUUID();
+    await db.insert(generations).values({
+      id: generationId,
+      userId,
+      kind: 'image',
+      status: 'pending',
+      modelId,
+      prompt,
+      sourceUrl: image_urls[0],
+      credits: IMAGE_CREDITS,
     });
 
-    return ok({
-      request_id,
-      model_id: modelId,
-    });
+    try {
+      await reserveCredits({
+        userId,
+        amount: IMAGE_CREDITS,
+        idempotencyKey: generationId,
+        generationId,
+      });
+    } catch (error) {
+      await db
+        .update(generations)
+        .set({
+          status: 'failed',
+          errorMessage: 'insufficient credits',
+          completedAt: new Date(),
+        })
+        .where(eq(generations.id, generationId));
+      if (error instanceof InsufficientCreditsError) return fail(400, 'BIZ_001');
+      throw error;
+    }
+
+    try {
+      const { request_id } = await fal.queue.submit(model, {
+        input: {
+          prompt,
+          image_urls,
+        },
+        webhookUrl: `${process.env.NEXT_PUBLIC_API_BASE}/ai/webhook`,
+      });
+
+      await db
+        .update(generations)
+        .set({ status: 'processing', falRequestId: request_id })
+        .where(eq(generations.id, generationId));
+
+      return ok({
+        request_id,
+        model_id: modelId,
+      });
+    } catch (error) {
+      console.error('提交任务失败:', error);
+      await refundCredits({ userId, idempotencyKey: generationId });
+      await db
+        .update(generations)
+        .set({
+          status: 'failed',
+          errorMessage: 'submit failed',
+          completedAt: new Date(),
+        })
+        .where(eq(generations.id, generationId));
+      return fail(500);
+    }
   } catch (error) {
     console.error('提交任务失败:', error);
 

@@ -1,7 +1,11 @@
 import { NextRequest } from 'next/server';
+import { eq } from 'drizzle-orm';
 import verifyWebhookSignature from '@/lib/utils/falVerify';
 import { ok, fail } from '@/lib/services/apiRes';
 import { uploadToCloudFlare } from '../upload/util';
+import { db } from '@/lib/db';
+import { generations } from '@/lib/db/schema';
+import { refundCredits } from '@/lib/credits';
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,10 +36,45 @@ export async function POST(req: NextRequest) {
     // ✅ 4. 验证通过后再安全解析 JSON
     const rst = JSON.parse(bodyBuffer.toString('utf-8'));
 
-    // 在此处理业务逻辑，例如上传到 R2 或退回积分
     console.log('✅ Valid Fal webhook payload:', rst);
+    const falRequestId = requestId || rst.request_id;
+    const [job] = falRequestId
+      ? await db
+          .select()
+          .from(generations)
+          .where(eq(generations.falRequestId, falRequestId))
+      : [];
+
+    if (job && (job.status === 'completed' || job.status === 'failed')) {
+      return ok();
+    }
+
     if (rst.status === 'OK' && rst.payload !== null) {
-      await uploadToCloudFlare(rst.payload.images[0], 'ai3');
+      const resultUrl = await uploadToCloudFlare(rst.payload.images[0], 'ai3');
+      if (job) {
+        await db
+          .update(generations)
+          .set({
+            status: 'completed',
+            resultUrl,
+            completedAt: new Date(),
+          })
+          .where(eq(generations.id, job.id));
+      }
+      return ok();
+    }
+
+    if (job) {
+      await refundCredits({ userId: job.userId, idempotencyKey: job.id });
+      await db
+        .update(generations)
+        .set({
+          status: 'failed',
+          errorMessage:
+            typeof rst.error === 'string' ? rst.error : 'generation failed',
+          completedAt: new Date(),
+        })
+        .where(eq(generations.id, job.id));
     }
 
     return ok();

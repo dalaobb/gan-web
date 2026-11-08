@@ -1,7 +1,5 @@
 'use client';
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
-import { useSession } from 'next-auth/react';
 import { UserIcon } from 'lucide-react';
 import {
   DropdownMenu,
@@ -12,11 +10,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
+import { authClient } from '@/lib/auth-client';
 
 export default function Header() {
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
 
-  console.log(session);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -25,11 +23,11 @@ export default function Header() {
       <DropdownMenuPortal>
         {session?.user?.email ? (
           <DropdownMenuContent>
-            <DropdownMenuLabel>{session?.user?.email}</DropdownMenuLabel>
+            <DropdownMenuLabel>{session.user.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Billing</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => signOut()}>
+            <DropdownMenuItem onClick={() => authClient.signOut()}>
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

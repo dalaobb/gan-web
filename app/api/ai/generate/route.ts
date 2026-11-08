@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fal } from '@fal-ai/client';
+import type { AuthSession } from '@/lib/auth';
+import { eq } from 'drizzle-orm';
 import withAuth from '@/lib/services/withAuth';
 import { ok, fail } from '@/lib/services/apiRes';
 import { uploadToCloudFlare } from '../upload/util';
+import { db } from '@/lib/db';
+import { generations } from '@/lib/db/schema';
+import {
+  IMAGE_CREDITS,
+  InsufficientCreditsError,
+  refundCredits,
+  reserveCredits,
+} from '@/lib/credits';
 
 fal.config({
   credentials: process.env.FAL_KEY as string,
@@ -11,7 +21,10 @@ fal.config({
 // 设置较长的超时时间（5分钟）（模型一般都需要 10 分钟以上，鸡肋，仅供参考用）
 export const maxDuration = 300;
 
-export const POST = withAuth(async (request: NextRequest) => {
+export const POST = withAuth(async (request: NextRequest, _ctx: unknown, session: AuthSession) => {
+  let userId: string | undefined;
+  let generationId: string | undefined;
+  let charged = false;
   try {
     const formData = await request.formData();
 
@@ -49,6 +62,42 @@ export const POST = withAuth(async (request: NextRequest) => {
       }
     }
 
+    userId = session.user?.id;
+    if (!userId) return fail(401);
+
+    generationId = crypto.randomUUID();
+    await db.insert(generations).values({
+      id: generationId,
+      userId,
+      kind: 'image',
+      status: 'pending',
+      modelId: model,
+      prompt: prompt.trim(),
+      sourceUrl: image_url,
+      credits: IMAGE_CREDITS,
+    });
+
+    try {
+      await reserveCredits({
+        userId,
+        amount: IMAGE_CREDITS,
+        idempotencyKey: generationId,
+        generationId,
+      });
+    } catch (error) {
+      await db
+        .update(generations)
+        .set({
+          status: 'failed',
+          errorMessage: 'insufficient credits',
+          completedAt: new Date(),
+        })
+        .where(eq(generations.id, generationId));
+      if (error instanceof InsufficientCreditsError) return fail(400, 'BIZ_001');
+      throw error;
+    }
+    charged = true;
+
     // 使用 Promise.race 实现自定义超时控制
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
@@ -77,8 +126,26 @@ export const POST = withAuth(async (request: NextRequest) => {
     // 竞赛超时和生成任务
     const result = await Promise.race([generatePromise, timeoutPromise]);
 
+    await db
+      .update(generations)
+      .set({ status: 'completed', completedAt: new Date() })
+      .where(eq(generations.id, generationId));
+
     return ok(result);
   } catch (error) {
+    if (charged && userId && generationId) {
+      await refundCredits({ userId, idempotencyKey: generationId }).catch(
+        (refundError) => console.error(refundError)
+      );
+      await db
+        .update(generations)
+        .set({
+          status: 'failed',
+          errorMessage: 'generation failed',
+          completedAt: new Date(),
+        })
+        .where(eq(generations.id, generationId));
+    }
     console.error('生成失败:', error);
 
     // 根据错误类型返回不同信息

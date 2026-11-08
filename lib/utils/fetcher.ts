@@ -24,7 +24,7 @@ export const createFetcher = (
 
   const errorHandler = GlobalErrorHandler.getInstance();
 
-  const isMock = true; // 全局 mock 开关
+    const isMock = false;
 
   return async (url: string, config: RequestConfig = {}) => {
     const {

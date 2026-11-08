@@ -9,7 +9,7 @@ const promptMap = {
   },
   One02: {
     name: 'Anime to Real Coser',
-    zh: '动漫转真人Coser',
+    name_zh: '动漫转真人Coser',
     prompt:
       'Generate a photo of a girl cosplaying this illustration, with the background set at Comiket',
     prompt_zh: '生成一个女孩cosplay这张插画的照片，背景设置在Comiket',
@@ -24,103 +24,103 @@ const promptMap = {
   },
   One04: {
     name: 'Change Multiple Hairstyles',
-    name_zh: '',
+    name_zh: '换多种发型',
     prompt:
       'Generate avatars of this person with different hairstyles in a 3x3 grid format',
     prompt_zh: '',
   },
   One05: {
     name: 'Custom Marble Sculpture',
-    name_zh: '',
+    name_zh: '大理石雕塑',
     prompt:
       "A photorealistic image of an ultra-detailed sculpture of the subject in image made of shining marble. The sculpture should display smooth and reflective marble surface, emphasizing its luster and artistic craftsmanship. The design is elegant, highlighting the beauty and depth of marble. The lighting in the image should enhance the sculpture's contours and textures, creating a visually stunning and mesmerizing effect",
     prompt_zh: '',
   },
   One06: {
     name: 'Old Photo Colorization',
-    name_zh: '',
+    name_zh: '老照片上色',
     prompt: 'restore and colorize this photo.',
     prompt_zh: '',
   },
   One07: {
     name: 'Movie Storyboard',
-    name_zh: '',
+    name_zh: '电影分镜',
     prompt:
       'Create an addictively intriguing 12 part story with 12 images with these two characters in a classic black and white film noir detective story. Make it about missing treasure that they get clues for throughout and then finally discover. The story is thrilling throughout with emotional highs and lows and ending on a great twist and high note. Do not include any words or text on the images but tell the story purely through the imagery itself.',
     prompt_zh: '',
   },
   One08: {
     name: 'Illustration Drawing Process Four-Panel',
-    name_zh: '',
+    name_zh: '四格绘制过程',
     prompt:
       'Generate a four-panel drawing process for the character: Step 1: Line art, Step 2: Flat colors, Step 3: Add shadows, Step 4: Refine and complete. No text.',
     prompt_zh: '',
   },
   One09: {
     name: 'Multiple Character Poses Generation',
-    name_zh: '',
+    name_zh: '多种角色姿势',
     prompt:
       'Please create a pose sheet for this illustration, making various poses!',
     prompt_zh: '',
   },
   One10: {
     name: 'LEGO Minifigure',
-    name_zh: '',
+    name_zh: '乐高人仔',
     prompt:
       "Transform the person in the photo into a LEGO minifigure packaging box style, presented in isometric perspective. Label the box with the title 'bgg.one'. Inside the box, display the LEGO minifigure based on the person in the photo, along with their essential items (such as makeup, bags, or other items) as LEGO accessories. Beside the box, also display the actual LEGO minifigure itself, unpackaged, rendered in a realistic and vivid style.",
     prompt_zh: '',
   },
   One11: {
     name: 'Place Anime Statue in Real Life',
-    name_zh: '',
+    name_zh: '把角色放进现实',
     prompt:
       'A realistic photographic work. A gigantic statue of this person has been placed in a square in the center of Tokyo, with people looking up at it.',
     prompt_zh: '',
   },
   One12: {
     name: 'Manga Style Conversion',
-    name_zh: '',
+    name_zh: '漫画线稿',
     prompt:
       'Convert the input photo into a black-and-white manga-style line drawing.',
     prompt_zh: '',
   },
   One13: {
     name: 'Isometric Holographic Wireframe',
-    name_zh: '',
+    name_zh: '等距全息线框',
     prompt:
       'Based on the uploaded image, convert it into a holographic depiction using wireframe lines only.',
     prompt_zh: '',
   },
   One14: {
     name: 'Create an ID Photo',
-    name_zh: '',
+    name_zh: '证件照',
     prompt:
       'Crop the head and create a 2-inch ID photo with: 1. Blue background; 2. Professional business attire; 3. Frontal face; 4. Slight smile',
     prompt_zh: '',
   },
   One15: {
     name: 'Generate Miniature Scene from Image',
-    name_zh: '',
+    name_zh: '微缩场景',
     prompt: 'Convert the image to isometric view',
     prompt_zh: '',
   },
   One16: {
     name: 'Pirate Wanted Poster',
-    name_zh: '',
+    name_zh: '海盗通缉令',
     prompt:
       "Using the original image, recreate a pirate's wanted poster drawn on parchment. Brown monochrome, with the texture of aged parchment. Retain the style and character design of the original image down to the smallest detail, and paste it large at the top of the wanted poster. A close-up of the face. Have the character wear a pirate hat. Write the bounty amount at the bottom of the poster. The bounty amount will be random, and a fictitious currency unit will be used. Below the bounty amount, write the crime in small letters. Use a fictitious language. English or Chinese characters may not be used.",
     prompt_zh: '',
   },
   One17: {
     name: 'Glass Bottle Souvenir',
-    name_zh: '',
+    name_zh: '玻璃瓶纪念品',
     prompt:
       'A 1/7 scale commercialized collectible figure of the character from the photo, crafted in a highly realistic style. The figure is placed in a detailed beach environment with sand, seashells, and gentle ocean waves. The entire toy display is enclosed inside a clear souvenir glass bottle, giving it a premium miniature diorama look, with realistic lighting and shadows',
     prompt_zh: '',
   },
   One18: {
     name: 'Drawing on a Pen Display',
-    name_zh: '',
+    name_zh: '数位屏作画',
     prompt:
       'Photorealistic pen tablet screen. Realistic first-person hand holding the pen tablet and pen. The original image is reproduced on the pen tablet in an unfinished state. The line art has been extracted from the original image. Portions of the line art have been colored with the same coloring as the original image. Unfinished coloring. Must not be monochrome. About 70% of the coloring is done. Close-up. The pen tip is touching the tablet screen.',
     prompt_zh: '',
@@ -136,5 +136,27 @@ const promptMap = {
 type PromptsObject = typeof promptMap;
 export type PromptsKey = keyof PromptsObject;
 export type PromptsVal = (typeof promptMap)['One01'];
+
+export type StylePreset = {
+  id: PromptsKey;
+  name: string;
+  nameZh: string;
+  prompt: string;
+};
+
+export function stylePresets(): StylePreset[] {
+  return (Object.entries(promptMap) as [PromptsKey, PromptsVal][])
+    .filter(([, value]) => value.name.trim() && value.prompt.trim())
+    .map(([id, value]) => ({
+      id,
+      name: value.name,
+      nameZh: value.name_zh.trim() || value.name,
+      prompt: value.prompt,
+    }));
+}
+
+export function stylePreset(id: string): StylePreset | undefined {
+  return stylePresets().find((item) => item.id === id);
+}
 
 export default promptMap;

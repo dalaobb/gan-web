@@ -33,9 +33,9 @@ export default function StyleStudio({
 
   const title = lang === 'zh' ? preset.nameZh : preset.name;
   const media = styleMedia(preset.id);
-  const backHref = localizedPath(lang, '/styles/');
-  const nextPath = localizedPath(lang, `/styles/${preset.id}/`);
-  const loginHref = `${localizedPath(lang, '/login/')}?next=${encodeURIComponent(nextPath)}`;
+  const backHref = localizedPath(lang, '/styles');
+  const nextPath = localizedPath(lang, `/styles/${preset.id}`);
+  const loginHref = `${localizedPath(lang, '/login')}?next=${encodeURIComponent(nextPath)}`;
   const imageUrl = result?.data?.images?.[0]?.url;
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {

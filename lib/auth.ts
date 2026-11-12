@@ -68,7 +68,7 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    // Next is configured with trailingSlash, so /api/auth/get-session/ must match.
+    // Public URLs omit the trailing slash, and auth endpoints follow that.
     skipTrailingSlashes: true,
   },
   databaseHooks: {

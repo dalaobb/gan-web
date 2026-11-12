@@ -2,9 +2,9 @@
 export const showUnfinished = false;
 
 export const unfinishedPaths = [
-  '/covers/',
-  '/styles/',
-  '/login/',
-  '/photo-restoration/',
-  '/nano-banana/',
+  '/covers',
+  '/styles',
+  '/login',
+  '/photo-restoration',
+  '/nano-banana',
 ] as const;

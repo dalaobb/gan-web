@@ -4,9 +4,9 @@ import { showUnfinished, unfinishedPaths } from '@/lib/launch';
 
 const paths = [
   '/',
-  '/about/',
-  '/privacy/',
-  '/compress/',
+  '/about',
+  '/privacy',
+  '/compress',
   ...(showUnfinished ? unfinishedPaths : []),
 ];
 

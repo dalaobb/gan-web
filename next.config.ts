@@ -17,7 +17,7 @@ const isolatedHeaders = [
 const nextConfig = {
   // Configure `pageExtensions` to include markdown and MDX files
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
-  trailingSlash: true,
+  trailingSlash: false,
   agentRules: false,
 
   async redirects() {

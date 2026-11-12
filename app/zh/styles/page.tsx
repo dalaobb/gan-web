@@ -9,11 +9,11 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: {
-    canonical: new URL(localizedPath('zh', '/styles/'), SITE_URL).href,
+    canonical: new URL(localizedPath('zh', '/styles'), SITE_URL).href,
     languages: {
-      en: new URL(localizedPath('en', '/styles/'), SITE_URL).href,
-      zh: new URL(localizedPath('zh', '/styles/'), SITE_URL).href,
-      'x-default': new URL(localizedPath('en', '/styles/'), SITE_URL).href,
+      en: new URL(localizedPath('en', '/styles'), SITE_URL).href,
+      zh: new URL(localizedPath('zh', '/styles'), SITE_URL).href,
+      'x-default': new URL(localizedPath('en', '/styles'), SITE_URL).href,
     },
   },
 };

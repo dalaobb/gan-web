@@ -15,6 +15,6 @@ export const localeBootScript = `(function () {
   var onIndex = path === '/' || path === '/zh' || path === '/zh/';
   if (!onIndex) return;
   var prefersZh = (navigator.language || '').toLowerCase().indexOf('zh') === 0;
-  if (prefersZh && path === '/') location.replace('/zh/');
+  if (prefersZh && (path === '/' || path === '/zh/')) location.replace('/zh');
   else if (!prefersZh && (path === '/zh' || path === '/zh/')) location.replace('/');
 })();`;

@@ -14,7 +14,7 @@ Drag, paste, or choose the images. The work runs in this browser.
 
 Shrink a batch of JPEG, PNG, and WebP files, or turn an iPhone HEIC into a JPEG. Choose a quality, limit the long edge, or aim for a file size, then save the files one by one or as one ZIP.
 
-[Compress images](/compress/)
+[Compress images](/compress)
 
 ## What they share
 

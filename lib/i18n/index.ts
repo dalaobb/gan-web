@@ -332,10 +332,16 @@ export function unprefixedPath(pathname: string) {
   return stripped.startsWith('/') ? stripped : `/${stripped}`;
 }
 
+/** Public path with no trailing slash. The site root stays `/`. */
+function publicPath(pathname: string) {
+  if (!pathname || pathname === '/') return '/';
+  const trimmed = pathname.replace(/\/+$/, '');
+  if (!trimmed || trimmed === '/') return '/';
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+}
+
 export function localizedPath(lang: Lang, pathname: string) {
-  const bare = unprefixedPath(pathname);
-  const withSlash =
-    bare === '/' ? '/' : bare.endsWith('/') ? bare : `${bare}/`;
-  if (lang === 'en') return withSlash;
-  return withSlash === '/' ? '/zh/' : `/zh${withSlash}`;
+  const bare = publicPath(unprefixedPath(pathname));
+  if (lang === 'en') return bare;
+  return bare === '/' ? '/zh' : `/zh${bare}`;
 }

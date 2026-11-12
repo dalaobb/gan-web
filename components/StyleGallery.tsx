@@ -18,7 +18,7 @@ export default function StyleGallery({ lang }: { lang: Lang }) {
           return (
             <li key={item.id}>
               <a
-                href={localizedPath(lang, `/styles/${item.id}/`)}
+                href={localizedPath(lang, `/styles/${item.id}`)}
                 className="group block border border-(--line) bg-(--paper) hover:border-(--ink)"
               >
                 <span className="relative block overflow-hidden">

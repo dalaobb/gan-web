@@ -16,7 +16,7 @@ export async function generateMetadata({
   const { id } = await params;
   const preset = stylePreset(id);
   if (!preset) return {};
-  const path = `/styles/${preset.id}/`;
+  const path = `/styles/${preset.id}`;
   return {
     title: `${preset.name} | BgGone`,
     description: preset.prompt,

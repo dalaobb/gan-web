@@ -13,10 +13,10 @@ export default function Footer({ lang }: { lang: Lang }) {
         </a>
       </p>
       <p className="mt-2 flex justify-center gap-4">
-        <a className="hover:text-(--ink)" href={localizedPath(lang, '/about/')}>
+        <a className="hover:text-(--ink)" href={localizedPath(lang, '/about')}>
           {t(lang, 'aboutNav')}
         </a>
-        <a className="hover:text-(--ink)" href={localizedPath(lang, '/privacy/')}>
+        <a className="hover:text-(--ink)" href={localizedPath(lang, '/privacy')}>
           {t(lang, 'privacyNav')}
         </a>
       </p>

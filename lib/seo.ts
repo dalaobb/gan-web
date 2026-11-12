@@ -89,8 +89,8 @@ export function webApplicationJsonLd(lang: Lang) {
 
 const pagePath: Record<PageKey, string> = {
   home: '/',
-  about: '/about/',
-  privacy: '/privacy/',
+  about: '/about',
+  privacy: '/privacy',
 };
 
 export function pageMetadata(lang: Lang, page: PageKey): Metadata {
@@ -183,7 +183,7 @@ export function compressAppJsonLd(lang: Lang) {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: copy.name,
-    url: new URL(localizedPath(lang, '/compress/'), SITE_URL).href,
+    url: new URL(localizedPath(lang, '/compress'), SITE_URL).href,
     description: copy.description,
     applicationCategory: 'MultimediaApplication',
     operatingSystem: 'Any',
@@ -200,9 +200,9 @@ export function compressAppJsonLd(lang: Lang) {
 
 export function compressMetadata(lang: Lang): Metadata {
   const copy = compressCopy[lang];
-  const canonical = new URL(localizedPath(lang, '/compress/'), SITE_URL).href;
-  const enUrl = new URL(localizedPath('en', '/compress/'), SITE_URL).href;
-  const zhUrl = new URL(localizedPath('zh', '/compress/'), SITE_URL).href;
+  const canonical = new URL(localizedPath(lang, '/compress'), SITE_URL).href;
+  const enUrl = new URL(localizedPath('en', '/compress'), SITE_URL).href;
+  const zhUrl = new URL(localizedPath('zh', '/compress'), SITE_URL).href;
   const ogImage = '/bggone-compress.jpg';
 
   return {

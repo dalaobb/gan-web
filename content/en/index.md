@@ -50,7 +50,7 @@ Unlike other background removal tools, this one:
 
 A cutout can still be made smaller here, in a batch. JPEG, PNG, and WebP are included, and so is HEIC. You can also aim for a file size. Those files stay on this device too.
 
-[Compress images](/compress/)
+[Compress images](/compress)
 
 ## FAQ
 ### Do I need to log in or create an account?

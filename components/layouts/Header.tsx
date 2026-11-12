@@ -12,7 +12,7 @@ export default function Header({ lang }: { lang: Lang }) {
         <Navigation lang={lang} />
         <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
           <a
-            href={localizedPath(lang, '/compress/')}
+            href={localizedPath(lang, '/compress')}
             className="text-sm text-(--muted-ink) hover:text-(--ink)"
           >
             {t(lang, 'compressNav')}
@@ -20,13 +20,13 @@ export default function Header({ lang }: { lang: Lang }) {
           {showUnfinished ? (
             <>
               <a
-                href={localizedPath(lang, '/covers/')}
+                href={localizedPath(lang, '/covers')}
                 className="text-sm text-(--muted-ink) hover:text-(--ink)"
               >
                 {t(lang, 'coversNav')}
               </a>
               <a
-                href={localizedPath(lang, '/styles/')}
+                href={localizedPath(lang, '/styles')}
                 className="text-sm text-(--muted-ink) hover:text-(--ink)"
               >
                 {t(lang, 'stylesNav')}

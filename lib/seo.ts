@@ -203,7 +203,7 @@ export function compressMetadata(lang: Lang): Metadata {
   const canonical = new URL(localizedPath(lang, '/compress/'), SITE_URL).href;
   const enUrl = new URL(localizedPath('en', '/compress/'), SITE_URL).href;
   const zhUrl = new URL(localizedPath('zh', '/compress/'), SITE_URL).href;
-  const ogImage = '/bggone-bg-remover.jpg';
+  const ogImage = '/bggone-compress.jpg';
 
   return {
     title: copy.title,

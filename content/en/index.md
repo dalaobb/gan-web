@@ -46,6 +46,12 @@ Unlike other background removal tools, this one:
 - Handles multiple images — in a single batch
 - Costs nothing — no usage limits or paywalls
 
+## You can compress images too
+
+A cutout can still be made smaller here, in a batch. JPEG, PNG, and WebP are included, and so is HEIC. You can also aim for a file size. Those files stay on this device too.
+
+[Compress images](/compress/)
+
 ## FAQ
 ### Do I need to log in or create an account?
 No. BgGone needs no login and no signup — just open the page and start removing backgrounds.

@@ -2,7 +2,7 @@
 
 **BgGone** compresses a batch of images here: shrink JPEG, PNG, and WebP, or turn an iPhone HEIC into a JPEG. The work stays in this browser. Nothing is uploaded, and no login is required.
 
-Add several files, then choose a quality, a long edge, or a target file size. Save them one by one, or pack them into one ZIP.
+Add several files, then choose a quality, a long edge, or a target file size. Save them one by one, or pack them into one ZIP. For a transparent background, [remove it](/) first.
 
 ## How it works
 

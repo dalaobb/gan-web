@@ -4,7 +4,8 @@ import { useEffect, useId, useRef, useState } from 'react';
 import FileSaver from 'file-saver';
 import JSZip from 'jszip';
 import type { CompressJob, CompressReply, OutputFormat, PreviewReply, QualityId } from '@/lib/compress/protocol';
-import { bytesLookLikeHeic, heicPreview, nameLooksLikeHeic } from '@/lib/compress/heic';
+import { classifyFile } from '@/lib/compress/files';
+import { heicPreview } from '@/lib/compress/heic';
 import { t, type Lang } from '@/lib/i18n';
 import CompressCompareStage from '@/components/CompressCompareStage';
 
@@ -37,6 +38,7 @@ type Item = {
   width?: number;
   height?: number;
   cap?: number;
+  gif?: boolean;
 };
 
 function chip(on: boolean) {
@@ -66,6 +68,11 @@ function formatBytes(bytes: number) {
 function savedPercent(before: number, after: number) {
   if (before <= 0) return 0;
   return Math.max(0, Math.round((1 - after / before) * 100));
+}
+
+function grewPercent(before: number, after: number) {
+  if (before <= 0) return 0;
+  return Math.max(0, Math.round((after / before - 1) * 100));
 }
 
 function CompressRow({
@@ -131,15 +138,20 @@ function CompressRow({
           {item.status === 'error' ? t(lang, 'compressFailed') : null}
           {item.status === 'ready' ? formatBytes(item.file.size) : null}
           {item.status === 'done' && item.result
-            ? t(lang, 'compressSaved', {
+            ? t(lang, item.result.size > item.file.size ? 'compressGrew' : 'compressSaved', {
                 before: formatBytes(item.file.size),
                 after: formatBytes(item.result.size),
-                pct: String(savedPercent(item.file.size, item.result.size)),
+                pct: String(
+                  item.result.size > item.file.size
+                    ? grewPercent(item.file.size, item.result.size)
+                    : savedPercent(item.file.size, item.result.size)
+                ),
               })
             : null}
           {item.status === 'done' && item.width && item.height
             ? ` · ${item.width}×${item.height}`
             : null}
+          {item.gif ? ` · ${t(lang, 'compressGifFrame')}` : null}
           {item.status === 'done' && item.cap && item.result && item.result.size > item.cap
             ? ` · ${t(lang, 'compressOver', { size: formatBytes(item.cap) })}`
             : null}
@@ -235,21 +247,25 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
 
   async function addFiles(files?: FileList | File[] | null) {
     if (runningRef.current || !files?.length) return;
-    const picked: { file: File; heic: boolean }[] = [];
+    const picked: { file: File; kind: 'heic' | 'gif' | 'image' }[] = [];
+    let skipped = 0;
     for (const file of Array.from(files)) {
-      const named = nameLooksLikeHeic(file.name, file.type);
-      const heic =
-        named || bytesLookLikeHeic(new Uint8Array(await file.slice(0, 64).arrayBuffer()));
-      if (!file.type.startsWith('image/') && !heic) continue;
-      picked.push({ file, heic });
+      const kind = await classifyFile(file);
+      if (!kind) {
+        skipped += 1;
+        continue;
+      }
+      picked.push({ file, kind });
     }
-    if (runningRef.current || !picked.length) return;
-    setMessage('');
-    const next = picked.map(({ file, heic }) => ({
+    if (runningRef.current) return;
+    setMessage(skipped ? t(lang, 'compressSkipped', { count: String(skipped) }) : '');
+    if (!picked.length) return;
+    const next = picked.map(({ file, kind }) => ({
       id: crypto.randomUUID(),
       file,
-      preview: heic ? '' : URL.createObjectURL(file),
+      preview: kind === 'heic' ? '' : URL.createObjectURL(file),
       status: 'ready' as const,
+      gif: kind === 'gif',
     }));
     itemsRef.current = next;
     replaceItems(next);
@@ -562,7 +578,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
         <div className="relative m-auto h-64 text-sm sm:h-72 md:h-80">
           <input
             type="file"
-            accept="image/*,.heic,.heif"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.heic,.heif"
             multiple
             id={fileInputId}
             className="h-0 opacity-0"

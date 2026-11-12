@@ -1,3 +1,4 @@
+import ScrollTop from '@/components/ScrollTop';
 import Header from '@/components/layouts/Header';
 import Footer from '@/components/layouts/Footer';
 
@@ -11,6 +12,7 @@ export default function ChineseLayout({
       <Header lang="zh" />
       <main>{children}</main>
       <Footer lang="zh" />
+      <ScrollTop lang="zh" />
     </>
   );
 }

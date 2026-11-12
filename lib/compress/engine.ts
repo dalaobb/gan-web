@@ -1,4 +1,4 @@
-import { decodeHeic, looksLikeHeic } from '@/lib/compress/heic';
+import { cachedHeic, looksLikeHeic } from '@/lib/compress/heic';
 import type { OutputFormat, QualityId } from '@/lib/compress/protocol';
 
 const WASM = '/compress';
@@ -31,6 +31,7 @@ export type EncodeRequest = {
   quality: QualityId;
   maxEdge: number;
   targetBytes: number;
+  cacheId?: string;
 };
 
 export type EncodeResult = {
@@ -175,12 +176,19 @@ function trimEncoded(kind: Kind, buffer: ArrayBuffer) {
   return buffer;
 }
 
-async function pixelsFrom(bytes: ArrayBuffer, mime: string, name: string, maxEdge: number) {
-  const bitmap = looksLikeHeic(mime, name, bytes)
-    ? await createImageBitmap(await decodeHeic(bytes))
-    : await createImageBitmap(new Blob([bytes], { type: mime || 'application/octet-stream' }), {
-        imageOrientation: 'from-image',
-      });
+async function pixelsFrom(
+  bytes: ArrayBuffer,
+  mime: string,
+  name: string,
+  maxEdge: number,
+  cacheId?: string
+) {
+  const bitmap =
+    cacheId || looksLikeHeic(mime, name, bytes)
+      ? await createImageBitmap(await cachedHeic(cacheId, bytes))
+      : await createImageBitmap(new Blob([bytes], { type: mime || 'application/octet-stream' }), {
+          imageOrientation: 'from-image',
+        });
   let width = bitmap.width;
   let height = bitmap.height;
   const sourceWidth = width;
@@ -312,7 +320,8 @@ export async function compressImage(request: EncodeRequest): Promise<EncodeResul
     request.bytes,
     mime,
     request.name,
-    request.maxEdge
+    request.maxEdge,
+    request.cacheId
   );
   const resized = width !== sourceWidth || height !== sourceHeight;
   const encoded = await encodeToTarget(kind, data, canvas, quality, request.targetBytes);

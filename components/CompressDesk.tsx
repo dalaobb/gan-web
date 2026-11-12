@@ -5,7 +5,7 @@ import FileSaver from 'file-saver';
 import JSZip from 'jszip';
 import type { CompressJob, CompressReply, OutputFormat, PreviewReply, QualityId } from '@/lib/compress/protocol';
 import { classifyFile } from '@/lib/compress/files';
-import { heicPreview } from '@/lib/compress/heic';
+import { cachedHeic, forgetHeic, previewJpeg } from '@/lib/compress/heic';
 import { t, type Lang } from '@/lib/i18n';
 import CompressCompareStage from '@/components/CompressCompareStage';
 
@@ -39,6 +39,7 @@ type Item = {
   height?: number;
   cap?: number;
   gif?: boolean;
+  heic?: boolean;
 };
 
 function chip(on: boolean) {
@@ -216,26 +217,39 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
 
   useEffect(() => {
     return () => {
+      for (const item of itemsRef.current) forgetPixels(item);
       workerRef.current?.terminate();
-      for (const item of items) revokePreview(item.preview);
+      for (const item of itemsRef.current) revokePreview(item.preview);
     };
     // Revoke the previews held at unmount. Later additions are revoked in replaceItems.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function forgetPixels(item: Item) {
+    if (!item.heic) return;
+    forgetHeic(item.id);
+    workerRef.current?.postMessage({ type: 'drop', cacheId: item.id });
+  }
+
   function removeItem(id: string) {
     setItems((current) => {
       const removed = current.find((entry) => entry.id === id);
-      if (removed) revokePreview(removed.preview);
+      if (removed) {
+        forgetPixels(removed);
+        revokePreview(removed.preview);
+      }
       return current.filter((entry) => entry.id !== id);
     });
   }
 
   function replaceItems(next: Item[]) {
     setItems((current) => {
-      const keep = new Set(next.map((item) => item.preview));
+      const keep = new Set(next.map((item) => item.id));
       for (const item of current) {
-        if (!keep.has(item.preview)) revokePreview(item.preview);
+        if (!keep.has(item.id)) forgetPixels(item);
+        if (!next.some((entry) => entry.preview && entry.preview === item.preview)) {
+          revokePreview(item.preview);
+        }
       }
       return next;
     });
@@ -266,6 +280,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       preview: kind === 'heic' ? '' : URL.createObjectURL(file),
       status: 'ready' as const,
       gif: kind === 'gif',
+      heic: kind === 'heic',
     }));
     itemsRef.current = next;
     replaceItems(next);
@@ -292,7 +307,12 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
     const item = itemsRef.current.find((entry) => entry.id === itemId);
     if (!item) return;
     try {
-      const encoded = await heicPreview(await item.file.arrayBuffer());
+      const image = await cachedHeic(itemId, await item.file.arrayBuffer());
+      if (!itemsRef.current.some((entry) => entry.id === itemId)) {
+        forgetHeic(itemId);
+        return;
+      }
+      const encoded = await previewJpeg(image);
       setHeicPreview(itemId, URL.createObjectURL(new Blob([encoded], { type: 'image/jpeg' })));
     } catch (error) {
       console.error(error);
@@ -308,7 +328,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
     const id = ++jobId.current;
     previewRef.current.set(id, item.id);
     try {
-      worker().postMessage({ type: 'preview', id, bytes }, [bytes]);
+      worker().postMessage({ type: 'preview', id, cacheId: item.id, bytes }, [bytes]);
     } catch (error) {
       console.error(error);
       previewRef.current.delete(id);
@@ -414,6 +434,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       quality: runQuality,
       maxEdge: runEdge,
       targetBytes: runCap,
+      cacheId: item.heic ? item.id : undefined,
     });
     return result;
   }
@@ -438,6 +459,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       quality: runQuality,
       maxEdge: runEdge,
       targetBytes: runCap,
+      cacheId: item.heic ? item.id : undefined,
     };
 
     let reply: CompressReply;

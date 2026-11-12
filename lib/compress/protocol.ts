@@ -10,6 +10,7 @@ export type CompressJob = {
   quality: QualityId;
   maxEdge: number;
   targetBytes: number;
+  cacheId?: string;
 };
 
 export type CompressSuccess = {
@@ -33,7 +34,13 @@ export type CompressReply = CompressSuccess | CompressFailure;
 export type PreviewJob = {
   type: 'preview';
   id: number;
+  cacheId: string;
   bytes: ArrayBuffer;
+};
+
+export type DropJob = {
+  type: 'drop';
+  cacheId: string;
 };
 
 export type PreviewReply =

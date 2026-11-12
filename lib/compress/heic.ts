@@ -106,8 +106,28 @@ export async function decodeHeic(bytes: ArrayBuffer) {
   }
 }
 
-export async function heicPreview(bytes: ArrayBuffer) {
+const pixels = new Map<string, ImageData>();
+
+export function forgetHeic(id: string) {
+  pixels.delete(id);
+}
+
+function copyImage(image: ImageData) {
+  return new ImageData(new Uint8ClampedArray(image.data), image.width, image.height);
+}
+
+// The first decode feeds both the thumbnail and later compress passes.
+export async function cachedHeic(id: string | undefined, bytes: ArrayBuffer) {
+  if (id) {
+    const cached = pixels.get(id);
+    if (cached) return copyImage(cached);
+  }
   const image = await decodeHeic(bytes);
+  if (id) pixels.set(id, image);
+  return id ? copyImage(image) : image;
+}
+
+export async function previewJpeg(image: ImageData) {
   const bitmap = await createImageBitmap(image);
   try {
     const canvas =

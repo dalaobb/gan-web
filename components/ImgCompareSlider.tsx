@@ -119,7 +119,7 @@ export default function ImgCompareSlider({
           className="absolute inset-0 flex items-center justify-center bg-[color-mix(in_srgb,var(--paper)_72%,transparent)]"
         >
           <div className="text-center text-(--ink)">
-            <div className="mb-2 inline-block h-5 w-5 animate-spin rounded-full border border-(--line) border-t-(--ink)"></div>
+            <div className="mb-3 inline-block size-12 animate-spin rounded-full border-[5px] border-[color-mix(in_srgb,var(--ink)_22%,transparent)] border-t-(--ink)"></div>
             <p>{t(lang, 'processing')}</p>
           </div>
         </div>

@@ -10,7 +10,6 @@ import {
   type Backdrop,
 } from '@/lib/utils/background';
 import ImgCompareSlider from './ImgCompareSlider';
-import ImgModal from './ImgModal';
 
 export interface IPreviewDownloadProps {
   beforeFile: Blob & { name: string };
@@ -20,6 +19,7 @@ export interface IPreviewDownloadProps {
   backdrop?: Backdrop;
   className?: string;
   onClose: () => void;
+  onPreview: () => void;
 }
 
 export default function PreviewDownload({
@@ -30,13 +30,13 @@ export default function PreviewDownload({
   lang = 'en',
   backdrop = { type: 'transparent' },
   onClose,
+  onPreview,
 }: IPreviewDownloadProps) {
   const [beforeSrc, setBeforeSrc] = useState<string>();
   const [afterSrc, setAfterSrc] = useState<string>();
   const [composited, setComposited] = useState<
     (Blob & { name: string }) | null
   >(null);
-  const [show, setShow] = useState(false);
   const [copied, setCopied] = useState(false);
   const shownFile =
     backdrop.type !== 'transparent' && composited ? composited : afterFile;
@@ -44,10 +44,6 @@ export default function PreviewDownload({
     backdrop.type !== 'transparent' && !composited
       ? backdropStyle(backdrop)
       : undefined;
-
-  function preview() {
-    setShow(true);
-  }
 
   async function resultFile() {
     if (!afterFile) return;
@@ -156,7 +152,7 @@ export default function PreviewDownload({
           )}
         </p>
         <div className="flex gap-2">
-          <button onClick={preview} className="btn btn-line flex-1">
+          <button onClick={onPreview} className="btn btn-line flex-1">
             {t(lang, 'preview')}
           </button>
           {!!afterSrc && (
@@ -171,14 +167,6 @@ export default function PreviewDownload({
           )}
         </div>
       </div>
-      {beforeSrc && (
-        <ImgModal
-          isVisible={show}
-          url={afterSrc || beforeSrc}
-          imgStyle={frameStyle}
-          onClose={() => setShow(false)}
-        />
-      )}
     </div>
   );
 }

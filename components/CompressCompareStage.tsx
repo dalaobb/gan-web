@@ -5,12 +5,13 @@ import { t, type Lang } from '@/lib/i18n';
 
 type StageItem = {
   id: string;
-  file: File;
+  file: Blob & { name: string };
   preview: string;
   result?: Blob;
   resultName?: string;
   width?: number;
   height?: number;
+  caption?: string;
 };
 
 type Pan = { x: number; y: number };
@@ -58,11 +59,13 @@ export default function CompressCompareStage({
   items,
   lang,
   initialId,
+  outputLabel,
   onClose,
 }: {
   items: StageItem[];
   lang: Lang;
   initialId: string;
+  outputLabel?: string;
   onClose: () => void;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -301,7 +304,7 @@ export default function CompressCompareStage({
         </div>
         {afterSrc ? (
           <div className="pointer-events-none absolute top-3 right-3 bg-(--paper) px-2 py-1 text-xs">
-            {t(lang, 'compressOutput')}
+            {outputLabel ?? t(lang, 'compressOutput')}
           </div>
         ) : null}
         {afterSrc ? (
@@ -358,13 +361,15 @@ export default function CompressCompareStage({
         <span className="min-w-0 flex-1 truncate text-sm text-(--muted-ink)">
           {name}
           {' · '}
-          {active.result
-            ? `${t(lang, 'compressSaved', {
-                before: formatBytes(active.file.size),
-                after: formatBytes(active.result.size),
-                pct: String(savedPercent(active.file.size, active.result.size)),
-              })}${imgW && imgH ? ` · ${imgW}×${imgH}` : ''}`
-            : formatBytes(active.file.size)}
+          {active.caption
+            ? `${active.caption}${imgW && imgH ? ` · ${imgW}×${imgH}` : ''}`
+            : active.result
+              ? `${t(lang, 'compressSaved', {
+                  before: formatBytes(active.file.size),
+                  after: formatBytes(active.result.size),
+                  pct: String(savedPercent(active.file.size, active.result.size)),
+                })}${imgW && imgH ? ` · ${imgW}×${imgH}` : ''}`
+              : formatBytes(active.file.size)}
         </span>
         {items.length > 1 ? (
           <>

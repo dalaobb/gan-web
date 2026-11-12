@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
-import { formatTime } from '@/lib/utils';
+import { formatFileSize, formatTime } from '@/lib/utils';
 import { smallModelKey } from '@/lib/utils/const';
 import { removeBackground } from '@/lib/utils/remover';
 import { isMobileDevice } from '@/lib/utils/remover/utils';
@@ -11,6 +11,7 @@ import { ImageType } from '@/lib/types';
 import { t, type Lang } from '@/lib/i18n';
 import { paintBackground, type Backdrop } from '@/lib/utils/background';
 import BackgroundPicker from '@/components/BackgroundPicker';
+import CompressCompareStage from '@/components/CompressCompareStage';
 import PreviewDownload from '@/components/PreviewDownload';
 import SelectImage from '@/components/SelectImage';
 
@@ -34,6 +35,9 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
   const [saving, setSaving] = useState(false);
   const [time, setTime] = useState('');
   const [wasmOnnxModel, setWasmOnnxModel] = useState(false);
+  const [compareAt, setCompareAt] = useState<number | null>(null);
+  const [beforeUrls, setBeforeUrls] = useState<string[]>([]);
+  const [compareResults, setCompareResults] = useState<(Blob | undefined)[]>([]);
 
   useEffect(() => {
     const model = window.localStorage.getItem(smallModelKey);
@@ -135,6 +139,86 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
     const duringTime = performance.now() - startTime;
     setTime(formatTime(duringTime));
   }, [isLoading, imgSliders, format, lang]);
+
+  const slidersRef = useRef(imgSliders);
+  slidersRef.current = imgSliders;
+  const backdropRef = useRef(backdrop);
+  backdropRef.current = backdrop;
+
+  const fileKey = imgSliders?.map((item) => `${item.beforeFile.name}:${item.beforeFile.size}`).join('|') ?? '';
+  const resultKey =
+    imgSliders?.map((item) => (item.afterFile ? `${item.afterFile.size}:${item.afterFile.type}` : '')).join('|') ?? '';
+  const backdropKey =
+    backdrop.type === 'color'
+      ? `color:${backdrop.color}`
+      : backdrop.type === 'image'
+        ? `image:${backdrop.url}`
+        : 'transparent';
+  const openKey = compareAt == null ? '' : `${compareAt}:${fileKey}`;
+  const resultStamp = compareAt == null ? '' : `${fileKey}|${resultKey}|${backdropKey}`;
+  const [urlKey, setUrlKey] = useState('');
+  const [shownStamp, setShownStamp] = useState('');
+  if (openKey !== urlKey) {
+    setUrlKey(openKey);
+    setBeforeUrls([]);
+  }
+  if (resultStamp !== shownStamp) {
+    setShownStamp(resultStamp);
+    setCompareResults([]);
+  }
+
+  useEffect(() => {
+    const items = slidersRef.current;
+    if (compareAt == null || !items?.length) return;
+    const urls = items.map((item) => URL.createObjectURL(item.beforeFile));
+    setBeforeUrls(urls);
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [compareAt, fileKey]);
+
+  useEffect(() => {
+    const items = slidersRef.current;
+    if (compareAt == null || !items?.length) return;
+    let cancelled = false;
+    const choice = backdropRef.current;
+    Promise.all(
+      items.map(async (item) => {
+        if (!item.afterFile) return undefined;
+        if (choice.type === 'transparent') return item.afterFile;
+        return Object.assign(await paintBackground(item.afterFile, choice), {
+          name: item.afterFile.name,
+        });
+      })
+    )
+      .then((list) => {
+        if (!cancelled) setCompareResults(list);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!cancelled) setCompareResults(items.map((item) => item.afterFile));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [compareAt, resultKey, backdropKey]);
+
+  const compareItems = useMemo(() => {
+    if (compareAt == null || !imgSliders || beforeUrls.length !== imgSliders.length) return [];
+    return imgSliders.map((item, index) => {
+      const result = compareResults[index];
+      return {
+        id: String(index),
+        file: item.beforeFile,
+        preview: beforeUrls[index],
+        result,
+        resultName: item.afterFile?.name ?? item.beforeFile.name,
+        caption: result
+          ? `${formatFileSize(item.beforeFile.size)} → ${formatFileSize(result.size)}`
+          : formatFileSize(item.beforeFile.size),
+      };
+    });
+  }, [compareAt, imgSliders, beforeUrls, compareResults]);
 
   const imgs = imgSliders
     ?.filter((it) => !!it.afterFile)
@@ -269,9 +353,11 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
                 afterFile={afterFile}
                 backdrop={backdrop}
                 processing={status === 'processing'}
-                onClose={() =>
-                  setImgSliders(imgSliders.filter((_, i) => i !== index))
-                }
+                onPreview={() => setCompareAt(index)}
+                onClose={() => {
+                  setCompareAt(null);
+                  setImgSliders(imgSliders.filter((_, i) => i !== index));
+                }}
               />
             ))}
           </div>
@@ -302,6 +388,15 @@ export default function RemoveBg({ lang = 'en' }: { lang?: Lang }) {
           </div>
         </div>
       )}
+      {compareAt != null && compareItems.length ? (
+        <CompressCompareStage
+          lang={lang}
+          initialId={String(compareAt)}
+          outputLabel={t(lang, 'cutoutOutput')}
+          onClose={() => setCompareAt(null)}
+          items={compareItems}
+        />
+      ) : null}
     </>
   );
 }

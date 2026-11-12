@@ -29,6 +29,7 @@ export type EncodeRequest = {
   format: OutputFormat;
   quality: QualityId;
   maxEdge: number;
+  targetBytes: number;
 };
 
 export type EncodeResult = {
@@ -250,6 +251,55 @@ async function encodeCanvas(
   return blob.arrayBuffer();
 }
 
+const MIN_QUALITY = 20;
+
+async function encodeAt(
+  kind: Kind,
+  data: ImageData,
+  canvas: OffscreenCanvas | HTMLCanvasElement,
+  quality: number,
+  canvasOnly: { current: boolean }
+) {
+  if (!canvasOnly.current) {
+    try {
+      return await encodeWasm(kind, data, quality);
+    } catch {
+      canvasOnly.current = true;
+    }
+  }
+  return encodeCanvas(canvas, kind, quality);
+}
+
+async function encodeToTarget(
+  kind: Kind,
+  data: ImageData,
+  canvas: OffscreenCanvas | HTMLCanvasElement,
+  quality: number,
+  targetBytes: number
+) {
+  const canvasOnly = { current: false };
+  let encoded = await encodeAt(kind, data, canvas, quality, canvasOnly);
+  if (kind === 'png' || targetBytes <= 0 || encoded.byteLength <= targetBytes) return encoded;
+
+  let smallest = encoded;
+  let fitted: ArrayBuffer | null = null;
+  for (let attempt = 0; attempt < 4 && quality > MIN_QUALITY; attempt += 1) {
+    const next = Math.max(
+      MIN_QUALITY,
+      Math.min(quality - 5, Math.round(quality * (targetBytes / encoded.byteLength) * 0.92))
+    );
+    if (next === quality) break;
+    quality = next;
+    encoded = await encodeAt(kind, data, canvas, quality, canvasOnly);
+    if (encoded.byteLength < smallest.byteLength) smallest = encoded;
+    if (encoded.byteLength <= targetBytes) {
+      fitted = encoded;
+      break;
+    }
+  }
+  return fitted ?? smallest;
+}
+
 export async function compressImage(request: EncodeRequest): Promise<EncodeResult> {
   const mime = normalizeMime(request.mime);
   const kind = chooseKind(mime, request.format);
@@ -260,13 +310,7 @@ export async function compressImage(request: EncodeRequest): Promise<EncodeResul
     request.maxEdge
   );
   const resized = width !== sourceWidth || height !== sourceHeight;
-
-  let encoded: ArrayBuffer;
-  try {
-    encoded = await encodeWasm(kind, data, quality);
-  } catch {
-    encoded = await encodeCanvas(canvas, kind, quality);
-  }
+  const encoded = await encodeToTarget(kind, data, canvas, quality, request.targetBytes);
 
   const outputMime = MIME[kind];
   const sameFile =

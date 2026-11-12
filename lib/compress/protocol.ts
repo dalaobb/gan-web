@@ -9,6 +9,7 @@ export type CompressJob = {
   format: OutputFormat;
   quality: QualityId;
   maxEdge: number;
+  targetBytes: number;
 };
 
 export type CompressSuccess = {

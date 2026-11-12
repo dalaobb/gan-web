@@ -10,6 +10,8 @@ import CompressCompareStage from '@/components/CompressCompareStage';
 const FORMATS: OutputFormat[] = ['keep', 'jpeg', 'webp', 'png'];
 const QUALITIES: QualityId[] = ['smaller', 'balanced', 'high'];
 const EDGES = [0, 2560, 1920, 1280, 1024, 512] as const;
+const CAPS = [0, 100 * 1024, 200 * 1024, 500 * 1024, 1024 * 1024] as const;
+const MAX_CUSTOM_KB = 10240;
 
 const FORMAT_KEY = {
   keep: 'compressKeep',
@@ -33,12 +35,20 @@ type Item = {
   resultName?: string;
   width?: number;
   height?: number;
+  cap?: number;
 };
 
 function chip(on: boolean) {
   return on
     ? 'border border-(--ink) px-3 py-2 text-sm'
     : 'border border-(--line) px-3 py-2 text-sm text-(--muted-ink) hover:border-(--ink) hover:text-(--ink)';
+}
+
+function customCapBytes(raw: string) {
+  if (!raw) return null;
+  const kb = Number(raw);
+  if (!Number.isFinite(kb) || kb <= 0) return null;
+  return Math.min(kb, MAX_CUSTOM_KB) * 1024;
 }
 
 function formatBytes(bytes: number) {
@@ -121,6 +131,9 @@ function CompressRow({
           {item.status === 'done' && item.width && item.height
             ? ` · ${item.width}×${item.height}`
             : null}
+          {item.status === 'done' && item.cap && item.result && item.result.size > item.cap
+            ? ` · ${t(lang, 'compressOver', { size: formatBytes(item.cap) })}`
+            : null}
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -167,6 +180,9 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   const [format, setFormat] = useState<OutputFormat>('keep');
   const [quality, setQuality] = useState<QualityId>('balanced');
   const [maxEdge, setMaxEdge] = useState<number>(0);
+  const [targetBytes, setTargetBytes] = useState<number>(0);
+  const [customKb, setCustomKb] = useState('');
+  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [running, setRunning] = useState(false);
   const [zipping, setZipping] = useState(false);
   const [message, setMessage] = useState('');
@@ -280,7 +296,13 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
     return next;
   }
 
-  async function compressHere(item: Item, runFormat: OutputFormat, runQuality: QualityId, runEdge: number) {
+  async function compressHere(
+    item: Item,
+    runFormat: OutputFormat,
+    runQuality: QualityId,
+    runEdge: number,
+    runCap: number
+  ) {
     const { compressImage } = await import('@/lib/compress/engine');
     const result = await compressImage({
       bytes: await item.file.arrayBuffer(),
@@ -289,12 +311,19 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       format: runFormat,
       quality: runQuality,
       maxEdge: runEdge,
+      targetBytes: runCap,
     });
     return result;
   }
 
-  async function compressOne(item: Item, runFormat: OutputFormat, runQuality: QualityId, runEdge: number) {
-    if (mainRef.current) return compressHere(item, runFormat, runQuality, runEdge);
+  async function compressOne(
+    item: Item,
+    runFormat: OutputFormat,
+    runQuality: QualityId,
+    runEdge: number,
+    runCap: number
+  ) {
+    if (mainRef.current) return compressHere(item, runFormat, runQuality, runEdge, runCap);
 
     const bytes = await item.file.arrayBuffer();
     const id = ++jobId.current;
@@ -306,6 +335,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       format: runFormat,
       quality: runQuality,
       maxEdge: runEdge,
+      targetBytes: runCap,
     };
 
     let reply: CompressReply;
@@ -316,14 +346,14 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       });
     } catch {
       mainRef.current = true;
-      return compressHere(item, runFormat, runQuality, runEdge);
+      return compressHere(item, runFormat, runQuality, runEdge, runCap);
     }
 
     if (!reply.ok && reply.message === 'worker') {
       mainRef.current = true;
       workerRef.current?.terminate();
       workerRef.current = null;
-      return compressHere(item, runFormat, runQuality, runEdge);
+      return compressHere(item, runFormat, runQuality, runEdge, runCap);
     }
     if (!reply.ok) throw new Error(reply.message);
     return reply;
@@ -335,18 +365,23 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
     const runFormat = format;
     const runQuality = quality;
     const runEdge = maxEdge;
+    const runCap = customCapBytes(customKb) ?? targetBytes;
+    const queue = items;
+    setProgress({ current: 1, total: queue.length });
     setRunning(true);
     setMessage('');
 
-    for (const item of items) {
+    for (let index = 0; index < queue.length; index += 1) {
+      const item = queue[index];
       if (runRef.current !== run) break;
+      setProgress({ current: index + 1, total: queue.length });
       setItems((current) =>
         current.map((entry) =>
           entry.id === item.id ? { ...entry, status: 'working' } : entry
         )
       );
       try {
-        const result = await compressOne(item, runFormat, runQuality, runEdge);
+        const result = await compressOne(item, runFormat, runQuality, runEdge, runCap);
         if (runRef.current !== run) break;
         const blob = new Blob([result.bytes], { type: result.mime });
         setItems((current) =>
@@ -359,6 +394,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
                   resultName: result.name,
                   width: result.width,
                   height: result.height,
+                  cap: runCap > 0 ? runCap : undefined,
                 }
               : entry
           )
@@ -374,7 +410,10 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       }
     }
 
-    if (runRef.current === run) setRunning(false);
+    if (runRef.current === run) {
+      setRunning(false);
+      setProgress(null);
+    }
   }
 
   function finishedItems() {
@@ -505,6 +544,45 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
             </button>
           ))}
         </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {CAPS.map((cap) => (
+            <button
+              key={cap}
+              type="button"
+              aria-pressed={cap === (customCapBytes(customKb) ?? targetBytes)}
+              disabled={running}
+              className={chip(cap === (customCapBytes(customKb) ?? targetBytes))}
+              onClick={() => {
+                setTargetBytes(cap);
+                setCustomKb('');
+              }}
+            >
+              {cap === 0
+                ? t(lang, 'compressCapNone')
+                : cap >= 1024 * 1024
+                  ? t(lang, 'compressCapMb', { size: String(cap / (1024 * 1024)) })
+                  : t(lang, 'compressCapKb', { size: String(Math.round(cap / 1024)) })}
+            </button>
+          ))}
+          <label className="flex items-center gap-2 border border-(--line) px-3 py-2 text-sm">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={customKb}
+              disabled={running}
+              placeholder={t(lang, 'compressCapCustom')}
+              aria-label={t(lang, 'compressCapCustom')}
+              className="w-16 bg-transparent text-(--ink) outline-none placeholder:text-(--muted-ink) disabled:opacity-40"
+              onChange={(event) => setCustomKb(event.target.value.replace(/\D/g, '').slice(0, 5))}
+              onBlur={() => {
+                if (!customKb) return;
+                const kb = Math.min(Number(customKb), MAX_CUSTOM_KB);
+                setCustomKb(kb > 0 ? String(kb) : '');
+              }}
+            />
+            <span className="text-(--muted-ink)">KB</span>
+          </label>
+        </div>
         <p className="mt-3 text-sm text-(--muted-ink)">{t(lang, 'compressPngNote')}</p>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -514,7 +592,12 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
               disabled={running || !items.length}
               onClick={compressAll}
             >
-              {running ? t(lang, 'processing') : t(lang, 'compressStart')}
+              {running && progress
+                ? t(lang, 'compressProgress', {
+                    current: String(progress.current),
+                    total: String(progress.total),
+                  })
+                : t(lang, 'compressStart')}
             </button>
             <button
               type="button"
@@ -523,6 +606,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
               onClick={() => {
                 runRef.current += 1;
                 setRunning(false);
+                setProgress(null);
                 replaceItems([]);
                 setMessage('');
                 setPreviewId(undefined);

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { localizedPath, SITE_URL } from '@/lib/i18n';
 
-const paths = ['/', '/about/', '/privacy/', '/styles/'];
+const paths = ['/', '/about/', '/privacy/', '/covers/', '/styles/'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const today = new Date();

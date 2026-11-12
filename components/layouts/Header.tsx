@@ -11,6 +11,12 @@ export default function Header({ lang }: { lang: Lang }) {
         <Navigation lang={lang} />
         <div className="flex items-center gap-4">
           <a
+            href={localizedPath(lang, '/covers/')}
+            className="text-sm text-(--muted-ink) hover:text-(--ink)"
+          >
+            {t(lang, 'coversNav')}
+          </a>
+          <a
             href={localizedPath(lang, '/styles/')}
             className="text-sm text-(--muted-ink) hover:text-(--ink)"
           >

@@ -3,7 +3,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import FileSaver from 'file-saver';
 import JSZip from 'jszip';
-import type { CompressJob, CompressReply, OutputFormat, QualityId } from '@/lib/compress/protocol';
+import type { CompressJob, CompressReply, OutputFormat, PreviewReply, QualityId } from '@/lib/compress/protocol';
+import { bytesLookLikeHeic, heicPreview, nameLooksLikeHeic } from '@/lib/compress/heic';
 import { t, type Lang } from '@/lib/i18n';
 import CompressCompareStage from '@/components/CompressCompareStage';
 
@@ -49,6 +50,10 @@ function customCapBytes(raw: string) {
   const kb = Number(raw);
   if (!Number.isFinite(kb) || kb <= 0) return null;
   return Math.min(kb, MAX_CUSTOM_KB) * 1024;
+}
+
+function revokePreview(url: string) {
+  if (url.startsWith('blob:')) URL.revokeObjectURL(url);
 }
 
 function formatBytes(bytes: number) {
@@ -114,7 +119,11 @@ function CompressRow({
         item.status === 'working' ? 'processing' : ''
       }`}
     >
-      <img src={item.preview} alt="" className="h-14 w-14 shrink-0 border border-(--line) object-cover" />
+      {item.preview ? (
+        <img src={item.preview} alt="" className="h-14 w-14 shrink-0 border border-(--line) object-cover" />
+      ) : (
+        <span className="inline-block h-14 w-14 shrink-0 border border-(--line)" />
+      )}
       <div className="min-w-0 flex-1 basis-40">
         <p className="truncate text-sm">{name}</p>
         <p className="mt-1 text-sm text-(--muted-ink)">
@@ -173,8 +182,11 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   const workerRef = useRef<Worker | null>(null);
   const mainRef = useRef(false);
   const jobsRef = useRef(new Map<number, (reply: CompressReply) => void>());
+  const previewRef = useRef(new Map<number, string>());
+  const itemsRef = useRef<Item[]>([]);
   const jobId = useRef(0);
   const runRef = useRef(0);
+  const runningRef = useRef(false);
   const [dragging, setDragging] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [format, setFormat] = useState<OutputFormat>('keep');
@@ -184,6 +196,8 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   const [customKb, setCustomKb] = useState('');
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [running, setRunning] = useState(false);
+  runningRef.current = running;
+  itemsRef.current = items;
   const [zipping, setZipping] = useState(false);
   const [message, setMessage] = useState('');
   const [previewId, setPreviewId] = useState<string>();
@@ -191,7 +205,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   useEffect(() => {
     return () => {
       workerRef.current?.terminate();
-      for (const item of items) URL.revokeObjectURL(item.preview);
+      for (const item of items) revokePreview(item.preview);
     };
     // Revoke the previews held at unmount. Later additions are revoked in replaceItems.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,7 +214,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   function removeItem(id: string) {
     setItems((current) => {
       const removed = current.find((entry) => entry.id === id);
-      if (removed) URL.revokeObjectURL(removed.preview);
+      if (removed) revokePreview(removed.preview);
       return current.filter((entry) => entry.id !== id);
     });
   }
@@ -209,25 +223,82 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
     setItems((current) => {
       const keep = new Set(next.map((item) => item.preview));
       for (const item of current) {
-        if (!keep.has(item.preview)) URL.revokeObjectURL(item.preview);
+        if (!keep.has(item.preview)) revokePreview(item.preview);
       }
       return next;
     });
   }
 
   function takeFiles(files?: FileList | File[] | null) {
-    if (running || !files?.length) return;
-    const images = Array.from(files).filter((file) => file.type.startsWith('image/'));
-    if (!images.length) return;
+    void addFiles(files);
+  }
+
+  async function addFiles(files?: FileList | File[] | null) {
+    if (runningRef.current || !files?.length) return;
+    const picked: { file: File; heic: boolean }[] = [];
+    for (const file of Array.from(files)) {
+      const named = nameLooksLikeHeic(file.name, file.type);
+      const heic =
+        named || bytesLookLikeHeic(new Uint8Array(await file.slice(0, 64).arrayBuffer()));
+      if (!file.type.startsWith('image/') && !heic) continue;
+      picked.push({ file, heic });
+    }
+    if (runningRef.current || !picked.length) return;
     setMessage('');
-    replaceItems(
-      images.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        preview: URL.createObjectURL(file),
-        status: 'ready',
-      }))
-    );
+    const next = picked.map(({ file, heic }) => ({
+      id: crypto.randomUUID(),
+      file,
+      preview: heic ? '' : URL.createObjectURL(file),
+      status: 'ready' as const,
+    }));
+    itemsRef.current = next;
+    replaceItems(next);
+    for (const item of next) {
+      if (!item.preview) void showHeicPreview(item);
+    }
+  }
+
+  function setHeicPreview(itemId: string, url: string) {
+    setItems((current) => {
+      if (!current.some((entry) => entry.id === itemId)) {
+        revokePreview(url);
+        return current;
+      }
+      return current.map((entry) => {
+        if (entry.id !== itemId) return entry;
+        revokePreview(entry.preview);
+        return { ...entry, preview: url };
+      });
+    });
+  }
+
+  async function previewOnMain(itemId: string) {
+    const item = itemsRef.current.find((entry) => entry.id === itemId);
+    if (!item) return;
+    try {
+      const encoded = await heicPreview(await item.file.arrayBuffer());
+      setHeicPreview(itemId, URL.createObjectURL(new Blob([encoded], { type: 'image/jpeg' })));
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function showHeicPreview(item: Item) {
+    if (mainRef.current) {
+      await previewOnMain(item.id);
+      return;
+    }
+    const bytes = await item.file.arrayBuffer();
+    const id = ++jobId.current;
+    previewRef.current.set(id, item.id);
+    try {
+      worker().postMessage({ type: 'preview', id, bytes }, [bytes]);
+    } catch (error) {
+      console.error(error);
+      previewRef.current.delete(id);
+      mainRef.current = true;
+      await previewOnMain(item.id);
+    }
   }
 
   useEffect(() => {
@@ -269,7 +340,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       const list = event.clipboardData?.items;
       for (let i = 0; list && i < list.length; i++) {
         const file = list[i].getAsFile();
-        if (file && file.type.startsWith('image/')) pasted.push(file);
+        if (file) pasted.push(file);
       }
       takeFiles(pasted);
     }
@@ -280,17 +351,32 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   function worker() {
     if (workerRef.current) return workerRef.current;
     const next = new Worker(new URL('../lib/compress/worker.ts', import.meta.url));
-    next.onmessage = (event: MessageEvent<CompressReply>) => {
-      const pending = jobsRef.current.get(event.data.id);
+    next.onmessage = (event: MessageEvent<CompressReply | PreviewReply>) => {
+      const data = event.data;
+      if ('type' in data && data.type === 'preview') {
+        const itemId = previewRef.current.get(data.id);
+        previewRef.current.delete(data.id);
+        if (!itemId || !data.ok) return;
+        setHeicPreview(itemId, URL.createObjectURL(new Blob([data.bytes], { type: 'image/jpeg' })));
+        return;
+      }
+      const reply = data as CompressReply;
+      const pending = jobsRef.current.get(reply.id);
       if (!pending) return;
-      jobsRef.current.delete(event.data.id);
-      pending(event.data);
+      jobsRef.current.delete(reply.id);
+      pending(reply);
     };
     next.onerror = () => {
+      mainRef.current = true;
       for (const [id, pending] of jobsRef.current) {
         pending({ id, ok: false, message: 'worker' });
       }
       jobsRef.current.clear();
+      const pendingPreviews = [...previewRef.current.values()];
+      previewRef.current.clear();
+      workerRef.current?.terminate();
+      workerRef.current = null;
+      for (const itemId of pendingPreviews) void previewOnMain(itemId);
     };
     workerRef.current = next;
     return next;
@@ -476,7 +562,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
         <div className="relative m-auto h-64 text-sm sm:h-72 md:h-80">
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             multiple
             id={fileInputId}
             className="h-0 opacity-0"

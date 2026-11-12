@@ -269,7 +269,7 @@ export default function CompressCompareStage({
           else showFit();
         }}
       >
-        {active.width && active.height ? null : (
+        {active.width && active.height ? null : afterSrc || active.preview ? (
           <img
             src={afterSrc || active.preview}
             alt=""
@@ -279,19 +279,21 @@ export default function CompressCompareStage({
               if (el.naturalWidth) setNatural({ w: el.naturalWidth, h: el.naturalHeight });
             }}
           />
-        )}
+        ) : null}
         {box.w > 0 && imgW > 0 ? (
           <div className="checker absolute" style={{ left, top, width: dispW, height: dispH }}>
             {afterSrc ? (
               <img src={afterSrc} alt={name} draggable={false} className="absolute inset-0 h-full w-full" />
             ) : null}
-            <img
-              src={active.preview}
-              alt={active.file.name}
-              draggable={false}
-              className="absolute inset-0 h-full w-full"
-              style={afterSrc ? { clipPath: `inset(0 ${rightInset}% 0 0)` } : undefined}
-            />
+            {active.preview ? (
+              <img
+                src={active.preview}
+                alt={active.file.name}
+                draggable={false}
+                className="absolute inset-0 h-full w-full"
+                style={afterSrc ? { clipPath: `inset(0 ${rightInset}% 0 0)` } : undefined}
+              />
+            ) : null}
           </div>
         ) : null}
         <div className="pointer-events-none absolute top-3 left-3 bg-(--paper) px-2 py-1 text-xs">

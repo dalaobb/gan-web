@@ -29,3 +29,13 @@ export type CompressFailure = {
 };
 
 export type CompressReply = CompressSuccess | CompressFailure;
+
+export type PreviewJob = {
+  type: 'preview';
+  id: number;
+  bytes: ArrayBuffer;
+};
+
+export type PreviewReply =
+  | { type: 'preview'; id: number; ok: true; bytes: ArrayBuffer }
+  | { type: 'preview'; id: number; ok: false; message: string };

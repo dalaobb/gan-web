@@ -33,6 +33,7 @@
     "drizzle-orm": "^0.45.4",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.2",
+    "libheif-js": "^1.23.5",
     "libsodium-wrappers": "^0.8.4",
     "lodash-es": "^4.18.1",
     "lucide-react": "^1.68.0",

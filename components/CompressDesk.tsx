@@ -590,7 +590,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   const doneCount = items.filter((item) => item.status === 'done').length;
 
   return (
-    <div className="pt-12 pb-16">
+    <div className="pt-12">
       <header className="mx-auto max-w-3xl px-4 pb-8 text-center">
         <h1 className="text-4xl leading-tight sm:text-[2.75rem]">{t(lang, 'compressTitle')}</h1>
         <p className="mt-3 text-base text-(--muted-ink)">{t(lang, 'compressLead')}</p>

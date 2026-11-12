@@ -83,7 +83,8 @@ export const translations = {
     coverFailed: 'Could not export that cover.',
     compressNav: 'Compress',
     compressTitle: 'Compress images',
-    compressLead: 'Shrink a batch of images in this browser. The files stay on this device.',
+    compressLead:
+      'Batch-compress JPEG, PNG, WebP, HEIC, and more, down to a size you choose. The files stay on this device.',
     compressKeep: 'Original format',
     compressJpeg: 'JPEG',
     compressWebp: 'WebP',
@@ -194,7 +195,8 @@ export const translations = {
     coverFailed: '这张封面没有导出。',
     compressNav: '压缩',
     compressTitle: '压缩图片',
-    compressLead: '在这台浏览器里批量压缩图片。文件留在这台设备上。',
+    compressLead:
+      '批量压缩 JPEG、PNG、WebP、HEIC 等图片，也可以压到指定体积。文件留在这台设备上。',
     compressKeep: '原格式',
     compressJpeg: 'JPEG',
     compressWebp: 'WebP',

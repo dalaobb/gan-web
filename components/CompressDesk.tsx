@@ -579,7 +579,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       for (const item of done) {
         zip.file(uniqueName(item.resultName || 'image', used), item.result as Blob);
       }
-      FileSaver.saveAs(await zip.generateAsync({ type: 'blob' }), 'compressed.zip');
+      FileSaver.saveAs(await zip.generateAsync({ type: 'blob' }), 'BgGone-compressed.zip');
     } catch {
       setMessage(t(lang, 'failedPackage'));
     } finally {

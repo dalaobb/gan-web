@@ -360,13 +360,17 @@ button:disabled {
 }
 
 .prose {
-  --tw-prose-body: var(--ink);
+  --tw-prose-body: var(--muted-ink);
   --tw-prose-headings: var(--ink);
   --tw-prose-links: var(--ink);
   --tw-prose-bold: var(--ink);
   --tw-prose-bullets: var(--muted-ink);
   --tw-prose-quotes: var(--ink);
   --tw-prose-hr: var(--line);
+}
+
+.prose :where(h2) {
+  margin-top: 3rem;
 }
 
 .prose :where(h2, h3) {

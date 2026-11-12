@@ -10,7 +10,7 @@ export default function EnglishLayout({
     <>
       <Header lang="en" />
       <main>{children}</main>
-      <Footer />
+      <Footer lang="en" />
     </>
   );
 }

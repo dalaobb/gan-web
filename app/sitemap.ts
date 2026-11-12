@@ -1,7 +1,14 @@
 import type { MetadataRoute } from 'next';
 import { localizedPath, SITE_URL } from '@/lib/i18n';
+import { showUnfinished, unfinishedPaths } from '@/lib/launch';
 
-const paths = ['/', '/about/', '/privacy/', '/compress/', '/covers/', '/styles/'];
+const paths = [
+  '/',
+  '/about/',
+  '/privacy/',
+  '/compress/',
+  ...(showUnfinished ? unfinishedPaths : []),
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const today = new Date();

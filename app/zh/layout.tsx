@@ -10,7 +10,7 @@ export default function ChineseLayout({
     <>
       <Header lang="zh" />
       <main>{children}</main>
-      <Footer />
+      <Footer lang="zh" />
     </>
   );
 }

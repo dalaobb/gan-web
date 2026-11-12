@@ -116,6 +116,8 @@ export const translations = {
     compressOutput: 'Compressed',
     compressStageHint: 'Drag the line. Scroll to zoom, double-click to toggle 100%. Drag the picture when it is larger than the frame.',
     compressClose: 'Close',
+    aboutNav: 'About',
+    privacyNav: 'Privacy',
   },
   zh: {
     click: '点击上传',
@@ -228,6 +230,8 @@ export const translations = {
     compressOutput: '压缩后',
     compressStageHint: '拖动分割线。滚轮缩放，双击切换 100%。图片大于画面时，拖动可平移。',
     compressClose: '关闭',
+    aboutNav: '关于',
+    privacyNav: '隐私',
   },
 } as const;
 
@@ -282,9 +286,9 @@ export const pageCopy: Record<
       title: 'BgGone – Free AI Background Remover, No Login or Upload',
     },
     about: {
-      pageTitle: 'About AI Background Remover',
-      secondTitle: 'Free, Batch, No Login, No Quality Loss',
-      title: 'About BgGone | Free AI Background Remover',
+      pageTitle: 'About BgGone',
+      secondTitle: 'Remove backgrounds and compress images in the browser',
+      title: 'About BgGone | Background Remover and Image Compression',
     },
     privacy: {
       pageTitle: 'Privacy Policy',
@@ -299,9 +303,9 @@ export const pageCopy: Record<
       title: 'BgGone – 免费 AI 抠图工具，无需登录、无需上传',
     },
     about: {
-      pageTitle: '关于 AI 智能抠图',
-      secondTitle: '免费、批量、无需登录、画质无损',
-      title: '关于 BgGone | 免费 AI 抠图工具',
+      pageTitle: '关于 BgGone',
+      secondTitle: '去除背景，压缩图片，都在浏览器里完成',
+      title: '关于 BgGone | 去除背景与压缩图片',
     },
     privacy: {
       pageTitle: '隐私政策',

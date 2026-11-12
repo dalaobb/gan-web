@@ -1,4 +1,7 @@
 import type { MetadataRoute } from 'next';
+import { showUnfinished, unfinishedPaths } from '@/lib/launch';
+
+const hidden = unfinishedPaths.flatMap((path) => [path, `/zh${path}`]);
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
+        disallow: showUnfinished ? [] : [...hidden],
       },
     ],
     sitemap: 'https://bgg.one/sitemap.xml',

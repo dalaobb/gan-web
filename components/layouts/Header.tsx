@@ -3,6 +3,7 @@ import Navigation from './Navigation';
 import ThemeIcon from './ThemeIcon';
 import LanguageSwitch from '@/components/LanguageSwitch';
 import { localizedPath, t, type Lang } from '@/lib/i18n';
+import { showUnfinished } from '@/lib/launch';
 
 export default function Header({ lang }: { lang: Lang }) {
   return (
@@ -16,18 +17,22 @@ export default function Header({ lang }: { lang: Lang }) {
           >
             {t(lang, 'compressNav')}
           </a>
-          <a
-            href={localizedPath(lang, '/covers/')}
-            className="text-sm text-(--muted-ink) hover:text-(--ink)"
-          >
-            {t(lang, 'coversNav')}
-          </a>
-          <a
-            href={localizedPath(lang, '/styles/')}
-            className="text-sm text-(--muted-ink) hover:text-(--ink)"
-          >
-            {t(lang, 'stylesNav')}
-          </a>
+          {showUnfinished ? (
+            <>
+              <a
+                href={localizedPath(lang, '/covers/')}
+                className="text-sm text-(--muted-ink) hover:text-(--ink)"
+              >
+                {t(lang, 'coversNav')}
+              </a>
+              <a
+                href={localizedPath(lang, '/styles/')}
+                className="text-sm text-(--muted-ink) hover:text-(--ink)"
+              >
+                {t(lang, 'stylesNav')}
+              </a>
+            </>
+          ) : null}
           <LanguageSwitch lang={lang} />
           <ThemeProvider
             attribute="class"

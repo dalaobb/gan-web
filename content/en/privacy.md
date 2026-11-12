@@ -4,7 +4,7 @@ Your images belong to you. That's the core promise of BgGone.
 
 ## No Uploads
 
-All background removal happens locally in your browser using on-device AI. Your images never leave your device and are never transmitted to our servers.
+Background removal and image compression both happen in your browser. Your images never leave your device and are never transmitted to our servers.
 
 ## No Tracking
 

@@ -10,6 +10,8 @@ export default function ImgCompareSlider({
   processing,
   lang = 'en',
   backdrop = { type: 'transparent' },
+  beforeAlt = 'Before | BgGone - Free AI Background Remover',
+  afterAlt = 'After | BgGone - Free AI Background Remover',
   onClose,
 }: {
   beforeSrc?: string;
@@ -17,6 +19,8 @@ export default function ImgCompareSlider({
   processing?: boolean;
   lang?: Lang;
   backdrop?: Backdrop;
+  beforeAlt?: string;
+  afterAlt?: string;
   onClose: () => void;
 }) {
   const imgContainerRef = useRef<HTMLDivElement>(null);
@@ -91,7 +95,7 @@ export default function ImgCompareSlider({
             className="checker w-full h-full object-cover"
             style={backdropStyle(backdrop)}
             src={afterSrc}
-            alt="After | BgGone - Free AI Background Remover"
+            alt={afterAlt}
           />
           <div ref={sliderRef} className="compare-handle backdrop-blur-md">
             <span className="compare-handle-arrow compare-handle-arrow-left" />
@@ -107,7 +111,7 @@ export default function ImgCompareSlider({
         style={{
           clipPath: afterSrc ? `inset(0 50% 0 0)` : 'inset(0 0 0 0)',
         }}
-        alt="Before | BgGone - Free AI Background Remover"
+        alt={beforeAlt}
       />
 
       {processing ? (

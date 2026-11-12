@@ -7,9 +7,15 @@ import { localizedPath, t, type Lang } from '@/lib/i18n';
 export default function Header({ lang }: { lang: Lang }) {
   return (
     <header>
-      <nav className="flex justify-between items-center h-14 border-b border-(--line)">
+      <nav className="flex min-h-14 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-(--line) py-2">
         <Navigation lang={lang} />
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+          <a
+            href={localizedPath(lang, '/compress/')}
+            className="text-sm text-(--muted-ink) hover:text-(--ink)"
+          >
+            {t(lang, 'compressNav')}
+          </a>
           <a
             href={localizedPath(lang, '/covers/')}
             className="text-sm text-(--muted-ink) hover:text-(--ink)"

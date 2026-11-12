@@ -192,14 +192,37 @@ button:disabled {
 
 .processing {
   position: relative;
+  overflow: hidden;
 }
 
-.processing::after {
+.processing::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  z-index: 2;
+  top: -12%;
+  left: -100%;
+  width: 100%;
+  height: 124%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--sheen) 40%, transparent) 32%,
+    var(--sheen) 50%,
+    color-mix(in srgb, var(--sheen) 40%, transparent) 68%,
+    transparent 100%
+  );
+  filter: blur(16px);
+  animation: shimmer 2s infinite;
   pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 .fade-in {
@@ -236,6 +259,7 @@ button:disabled {
   --radius: 2px;
   --paper: #f4f1ea;
   --paper-2: #ebe6dc;
+  --sheen: rgb(255 248 236 / 0.36);
   --ink: #1c1915;
   --ink-soft: #3a342c;
   --line: #c9c0b2;
@@ -276,6 +300,7 @@ button:disabled {
 .dark {
   --paper: #141210;
   --paper-2: #1e1b17;
+  --sheen: rgb(236 226 208 / 0.46);
   --ink: #f3efe6;
   --ink-soft: #ddd6c8;
   --line: #322d27;

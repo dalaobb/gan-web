@@ -1,6 +1,6 @@
 import type { Lang, PageKey } from '@/lib/i18n';
 import { pageCopy } from '@/lib/i18n';
-import { faqJsonLd } from '@/lib/seo';
+import { faqJsonLd, webApplicationJsonLd } from '@/lib/seo';
 import RemoveBG from '@/components/RemoveBG';
 import BackToTop from '@/components/BackToTop';
 import EnIndex from '@/content/en/index.md';
@@ -41,12 +41,20 @@ export default function SitePage({
           <Content />
         </div>
         {page === 'home' ? (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify(faqJsonLd(lang)),
-            }}
-          />
+          <>
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify(webApplicationJsonLd(lang)),
+              }}
+            />
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify(faqJsonLd(lang)),
+              }}
+            />
+          </>
         ) : null}
         {page === 'home' ? <BackToTop lang={lang} /> : null}
       </div>

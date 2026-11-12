@@ -1,16 +1,13 @@
 import type { Metadata, Viewport } from 'next';
 import { Newsreader, Source_Sans_3 } from 'next/font/google';
 import { GoogleAnalytics } from '@next/third-parties/google';
-import { headers } from 'next/headers';
+import Script from 'next/script';
 
 import ErrorHandlerProvider from '@/components/layouts/ErrorHandlerProvider';
-import Header from '@/components/layouts/Header';
-import Footer from '@/components/layouts/Footer';
 import DebugMobile from '@/components/DebugMobile';
-import LocaleRedirect from '@/components/LocaleRedirect';
 import { Toaster } from '@/components/ui/sonner';
-import { localeFromPath, type Lang } from '@/lib/i18n';
-import { siteJsonLd } from '@/lib/seo';
+import { localeBootScript } from '@/lib/locale-boot';
+import { organizationJsonLd } from '@/lib/seo';
 
 import '@/styles/globals.css';
 
@@ -56,41 +53,30 @@ export const viewport: Viewport = {
   ],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const requestHeaders = await headers();
-  const pathname = requestHeaders.get('x-pathname') || '/';
-  const lang: Lang =
-    requestHeaders.get('x-locale') === 'zh' || localeFromPath(pathname) === 'zh'
-      ? 'zh'
-      : 'en';
-
   return (
     <html
-      lang={lang}
-      data-lang={lang}
+      lang="en"
+      data-lang="en"
       className={`${display.variable} ${sans.variable} text-[16px]`}
       suppressHydrationWarning
     >
-      <body
-        className="antialiased px-4 sm:px-6"
-      >
-        <ErrorHandlerProvider>
-          <Header lang={lang} />
-          <main>{children}</main>
-          <Footer />
-        </ErrorHandlerProvider>
+      <body className="antialiased px-4 sm:px-6">
+        <Script id="bgg-locale" strategy="beforeInteractive">
+          {localeBootScript}
+        </Script>
+        <ErrorHandlerProvider>{children}</ErrorHandlerProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(siteJsonLd(lang, pathname)),
+            __html: JSON.stringify(organizationJsonLd()),
           }}
         />
         <GoogleAnalytics gaId="G-CZS9K7V64W" />
-        <LocaleRedirect />
         <DebugMobile />
         <Toaster richColors />
       </body>

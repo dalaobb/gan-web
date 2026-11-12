@@ -50,48 +50,40 @@ export function faqJsonLd(lang: Lang) {
   };
 }
 
-export function siteJsonLd(lang: Lang, pathname: string) {
-  const isHome =
-    pathname === '/' || pathname === '/zh' || pathname === '/zh/';
-  const description = descriptions[lang];
+export function organizationJsonLd() {
   return {
     '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'Organization',
-        name: 'BgGone',
-        url: SITE_URL,
-        logo: `${SITE_URL}/logo.png`,
-      },
-      ...(isHome
-        ? [
-            {
-              '@type': 'WebApplication',
-              name: 'BgGone',
-              url: SITE_URL,
-              description,
-              applicationCategory: 'MultimediaApplication',
-              operatingSystem: 'Any',
-              browserRequirements:
-                'Requires a modern browser with WebAssembly support',
-              inLanguage: ['en', 'zh'],
-              offers: {
-                '@type': 'Offer',
-                price: '0',
-                priceCurrency: 'USD',
-              },
-              featureList: [
-                'AI background remover',
-                'Batch background removal',
-                'Runs entirely in the browser',
-                'No uploads, privacy-first',
-                'Free, no signup, no watermarks',
-              ],
-              image: `${SITE_URL}/bggone-bg-remover.jpg`,
-            },
-          ]
-        : []),
+    '@type': 'Organization',
+    name: 'BgGone',
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.png`,
+  };
+}
+
+export function webApplicationJsonLd(lang: Lang) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'BgGone',
+    url: SITE_URL,
+    description: descriptions[lang],
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Any',
+    browserRequirements: 'Requires a modern browser with WebAssembly support',
+    inLanguage: ['en', 'zh'],
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    featureList: [
+      'AI background remover',
+      'Batch background removal',
+      'Runs entirely in the browser',
+      'No uploads, privacy-first',
+      'Free, no signup, no watermarks',
     ],
+    image: `${SITE_URL}/bggone-bg-remover.jpg`,
   };
 }
 

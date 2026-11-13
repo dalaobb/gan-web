@@ -13,6 +13,9 @@ export default function Footer({ lang }: { lang: Lang }) {
         </a>
       </p>
       <p className="mt-2 flex justify-center gap-4">
+        <a className="hover:text-(--ink)" href={localizedPath(lang, '/tools')}>
+          {t(lang, 'toolsNav')}
+        </a>
         <a className="hover:text-(--ink)" href={localizedPath(lang, '/about')}>
           {t(lang, 'aboutNav')}
         </a>

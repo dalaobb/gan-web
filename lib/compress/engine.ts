@@ -32,6 +32,7 @@ export type EncodeRequest = {
   maxEdge: number;
   targetBytes: number;
   cacheId?: string;
+  suffix?: string;
 };
 
 export type EncodeResult = {
@@ -129,9 +130,9 @@ function chooseKind(mime: string, format: OutputFormat): Kind {
   return 'jpeg';
 }
 
-function fileName(name: string, kind: Kind) {
+function fileName(name: string, kind: Kind, suffix = '_min_BgGone') {
   const base = (name.replace(/\.[^.]+$/, '') || 'image').replace(/_min_BgGone$/, '');
-  return `${base}_min_BgGone.${EXT[kind]}`;
+  return `${base}${suffix}.${EXT[kind]}`;
 }
 
 function flattenOnWhite(data: ImageData) {
@@ -334,7 +335,7 @@ export async function compressImage(request: EncodeRequest): Promise<EncodeResul
   return {
     bytes,
     mime: sameFile ? mime : outputMime,
-    name: sameFile ? request.name : fileName(request.name, kind),
+    name: sameFile ? request.name : fileName(request.name, kind, request.suffix),
     width,
     height,
   };

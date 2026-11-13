@@ -12,6 +12,18 @@ export default function Header({ lang }: { lang: Lang }) {
         <Navigation lang={lang} />
         <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
           <a
+            href={localizedPath(lang, '/tools')}
+            className="text-sm text-(--muted-ink) hover:text-(--ink)"
+          >
+            {t(lang, 'toolsNav')}
+          </a>
+          <a
+            href={localizedPath(lang, '/convert')}
+            className="text-sm text-(--muted-ink) hover:text-(--ink)"
+          >
+            {t(lang, 'convertNav')}
+          </a>
+          <a
             href={localizedPath(lang, '/compress')}
             className="text-sm text-(--muted-ink) hover:text-(--ink)"
           >

@@ -11,6 +11,7 @@ export type CompressJob = {
   maxEdge: number;
   targetBytes: number;
   cacheId?: string;
+  suffix?: string;
 };
 
 export type CompressSuccess = {

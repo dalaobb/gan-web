@@ -189,7 +189,23 @@ function CompressRow({
   );
 }
 
-export default function CompressDesk({ lang }: { lang: Lang }) {
+type CompressDeskProps = {
+  lang: Lang;
+  mode?: 'compress' | 'convert';
+  initialFormat?: OutputFormat;
+  heading?: string;
+  lead?: string;
+};
+
+export default function CompressDesk({
+  lang,
+  mode = 'compress',
+  initialFormat,
+  heading,
+  lead,
+}: CompressDeskProps) {
+  const isConvert = mode === 'convert';
+  const formats = isConvert ? FORMATS.filter((item) => item !== 'keep') : FORMATS;
   const fileInputId = useId();
   const dropRef = useRef<HTMLLabelElement>(null);
   const workerRef = useRef<Worker | null>(null);
@@ -202,8 +218,16 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   const runningRef = useRef(false);
   const [dragging, setDragging] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
-  const [format, setFormat] = useState<OutputFormat>('keep');
-  const [quality, setQuality] = useState<QualityId>('balanced');
+  const [format, setFormat] = useState<OutputFormat>(
+    initialFormat ?? (isConvert ? 'jpeg' : 'keep')
+  );
+  const [quality, setQuality] = useState<QualityId>(
+    isConvert ? 'high' : 'balanced'
+  );
+
+  useEffect(() => {
+    if (initialFormat) setFormat(initialFormat);
+  }, [initialFormat]);
   const [maxEdge, setMaxEdge] = useState<number>(0);
   const [targetBytes, setTargetBytes] = useState<number>(0);
   const [customKb, setCustomKb] = useState('');
@@ -435,6 +459,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       maxEdge: runEdge,
       targetBytes: runCap,
       cacheId: item.heic ? item.id : undefined,
+      suffix: isConvert ? '' : undefined,
     });
     return result;
   }
@@ -460,6 +485,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       maxEdge: runEdge,
       targetBytes: runCap,
       cacheId: item.heic ? item.id : undefined,
+      suffix: isConvert ? '' : undefined,
     };
 
     let reply: CompressReply;
@@ -486,10 +512,14 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   async function compressAll() {
     if (running || !items.length) return;
     const run = ++runRef.current;
-    const runFormat = format;
+    const runFormat = isConvert
+      ? format === 'keep'
+        ? 'jpeg'
+        : format
+      : format;
     const runQuality = quality;
-    const runEdge = maxEdge;
-    const runCap = customCapBytes(customKb) ?? targetBytes;
+    const runEdge = isConvert ? 0 : maxEdge;
+    const runCap = isConvert ? 0 : customCapBytes(customKb) ?? targetBytes;
     const queue = items;
     setProgress({ current: 1, total: queue.length });
     setRunning(true);
@@ -579,7 +609,10 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
       for (const item of done) {
         zip.file(uniqueName(item.resultName || 'image', used), item.result as Blob);
       }
-      FileSaver.saveAs(await zip.generateAsync({ type: 'blob' }), 'BgGone-compressed.zip');
+      FileSaver.saveAs(
+        await zip.generateAsync({ type: 'blob' }),
+        isConvert ? 'BgGone-converted.zip' : 'BgGone-compressed.zip'
+      );
     } catch {
       setMessage(t(lang, 'failedPackage'));
     } finally {
@@ -592,8 +625,12 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
   return (
     <div className="pt-12">
       <header className="mx-auto max-w-3xl px-4 pb-8 text-center">
-        <h1 className="text-4xl leading-tight sm:text-[2.75rem]">{t(lang, 'compressTitle')}</h1>
-        <p className="mt-3 text-base text-(--muted-ink)">{t(lang, 'compressLead')}</p>
+        <h1 className="text-4xl leading-tight sm:text-[2.75rem]">
+          {heading ?? t(lang, isConvert ? 'convertTitle' : 'compressTitle')}
+        </h1>
+        <p className="mt-3 text-base text-(--muted-ink)">
+          {lead ?? t(lang, isConvert ? 'convertLead' : 'compressLead')}
+        </p>
       </header>
 
       <div className="main-width">
@@ -627,7 +664,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
 
       <div className="glass-effect main-width mt-5 p-4">
         <div className="flex flex-wrap gap-2">
-          {FORMATS.map((item) => (
+          {formats.map((item) => (
             <button
               key={item}
               type="button"
@@ -654,60 +691,74 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
             </button>
           ))}
         </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {EDGES.map((edge) => (
-            <button
-              key={edge}
-              type="button"
-              aria-pressed={edge === maxEdge}
-              disabled={running}
-              className={chip(edge === maxEdge)}
-              onClick={() => setMaxEdge(edge)}
-            >
-              {edge === 0 ? t(lang, 'compressEdgeOriginal') : t(lang, 'compressEdge', { edge: String(edge) })}
-            </button>
-          ))}
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          {CAPS.map((cap) => (
-            <button
-              key={cap}
-              type="button"
-              aria-pressed={cap === (customCapBytes(customKb) ?? targetBytes)}
-              disabled={running}
-              className={chip(cap === (customCapBytes(customKb) ?? targetBytes))}
-              onClick={() => {
-                setTargetBytes(cap);
-                setCustomKb('');
-              }}
-            >
-              {cap === 0
-                ? t(lang, 'compressCapNone')
-                : cap >= 1024 * 1024
-                  ? t(lang, 'compressCapMb', { size: String(cap / (1024 * 1024)) })
-                  : t(lang, 'compressCapKb', { size: String(Math.round(cap / 1024)) })}
-            </button>
-          ))}
-          <label className="flex items-center gap-2 border border-(--line) px-3 py-2 text-sm">
-            <input
-              type="text"
-              inputMode="numeric"
-              value={customKb}
-              disabled={running}
-              placeholder={t(lang, 'compressCapCustom')}
-              aria-label={t(lang, 'compressCapCustom')}
-              className="w-16 bg-transparent text-(--ink) outline-none placeholder:text-(--muted-ink) disabled:opacity-40"
-              onChange={(event) => setCustomKb(event.target.value.replace(/\D/g, '').slice(0, 5))}
-              onBlur={() => {
-                if (!customKb) return;
-                const kb = Math.min(Number(customKb), MAX_CUSTOM_KB);
-                setCustomKb(kb > 0 ? String(kb) : '');
-              }}
-            />
-            <span className="text-(--muted-ink)">KB</span>
-          </label>
-        </div>
-        <p className="mt-3 text-sm text-(--muted-ink)">{t(lang, 'compressPngNote')}</p>
+        {!isConvert ? (
+          <>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {EDGES.map((edge) => (
+                <button
+                  key={edge}
+                  type="button"
+                  aria-pressed={edge === maxEdge}
+                  disabled={running}
+                  className={chip(edge === maxEdge)}
+                  onClick={() => setMaxEdge(edge)}
+                >
+                  {edge === 0
+                    ? t(lang, 'compressEdgeOriginal')
+                    : t(lang, 'compressEdge', { edge: String(edge) })}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {CAPS.map((cap) => (
+                <button
+                  key={cap}
+                  type="button"
+                  aria-pressed={cap === (customCapBytes(customKb) ?? targetBytes)}
+                  disabled={running}
+                  className={chip(cap === (customCapBytes(customKb) ?? targetBytes))}
+                  onClick={() => {
+                    setTargetBytes(cap);
+                    setCustomKb('');
+                  }}
+                >
+                  {cap === 0
+                    ? t(lang, 'compressCapNone')
+                    : cap >= 1024 * 1024
+                      ? t(lang, 'compressCapMb', {
+                          size: String(cap / (1024 * 1024)),
+                        })
+                      : t(lang, 'compressCapKb', {
+                          size: String(Math.round(cap / 1024)),
+                        })}
+                </button>
+              ))}
+              <label className="flex items-center gap-2 border border-(--line) px-3 py-2 text-sm">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={customKb}
+                  disabled={running}
+                  placeholder={t(lang, 'compressCapCustom')}
+                  aria-label={t(lang, 'compressCapCustom')}
+                  className="w-16 bg-transparent text-(--ink) outline-none placeholder:text-(--muted-ink) disabled:opacity-40"
+                  onChange={(event) =>
+                    setCustomKb(event.target.value.replace(/\D/g, '').slice(0, 5))
+                  }
+                  onBlur={() => {
+                    if (!customKb) return;
+                    const kb = Math.min(Number(customKb), MAX_CUSTOM_KB);
+                    setCustomKb(kb > 0 ? String(kb) : '');
+                  }}
+                />
+                <span className="text-(--muted-ink)">KB</span>
+              </label>
+            </div>
+          </>
+        ) : null}
+        <p className="mt-3 text-sm text-(--muted-ink)">
+          {t(lang, isConvert ? 'convertNote' : 'compressPngNote')}
+        </p>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -721,7 +772,7 @@ export default function CompressDesk({ lang }: { lang: Lang }) {
                     current: String(progress.current),
                     total: String(progress.total),
                   })
-                : t(lang, 'compressStart')}
+                : t(lang, isConvert ? 'convertStart' : 'compressStart')}
             </button>
             <button
               type="button"

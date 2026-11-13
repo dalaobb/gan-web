@@ -84,6 +84,17 @@ export const translations = {
     coverNeedTitle: 'Write a title first.',
     coverFailed: 'Could not export that cover.',
     compressNav: 'Compress',
+    convertNav: 'Convert',
+    toolsNav: 'Tools',
+    toolsTitle: 'Browser image tools',
+    toolsLead:
+      'Remove backgrounds, compress images, and convert formats locally. No upload and no login.',
+    convertTitle: 'Convert images',
+    convertLead:
+      'Convert HEIC, WebP, AVIF, PNG, and JPG in your browser. Batch, no upload, no login.',
+    convertStart: 'Convert',
+    convertNote:
+      'PNG is lossless. JPEG and WebP use the quality you choose. Files stay on this device.',
     compressTitle: 'Compress images',
     compressLead:
       'Batch-compress JPEG, PNG, WebP, HEIC, and more, down to a size you choose. The files stay on this device.',
@@ -200,6 +211,15 @@ export const translations = {
     coverNeedTitle: '先写标题。',
     coverFailed: '这张封面没有导出。',
     compressNav: '压缩',
+    convertNav: '转换',
+    toolsNav: '工具',
+    toolsTitle: '浏览器图片工具',
+    toolsLead: '在本机去除背景、压缩图片、转换格式。无需上传，也无需登录。',
+    convertTitle: '转换图片',
+    convertLead:
+      '在浏览器里转换 HEIC、WebP、AVIF、PNG、JPG 图片，可批量，无需上传，也无需登录。',
+    convertStart: '开始转换',
+    convertNote: 'PNG 保持无损。JPEG 和 WebP 使用你选择的质量。文件留在这台设备上。',
     compressTitle: '压缩图片',
     compressLead:
       '批量压缩 JPEG、PNG、WebP、HEIC 等图片，也可以压到指定体积。文件留在这台设备上。',

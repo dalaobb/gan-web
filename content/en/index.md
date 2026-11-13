@@ -52,6 +52,12 @@ A cutout can still be made smaller here, in a batch. JPEG, PNG, and WebP are inc
 
 [Compress images](/compress)
 
+## Convert HEIC, WebP, and AVIF too
+
+Need a different file format? Convert HEIC, WebP, AVIF, PNG, and JPG in the browser, in a batch. The files stay on this device.
+
+[Convert images](/convert) · [All tools](/tools)
+
 ## FAQ
 ### Do I need to log in or create an account?
 No. BgGone needs no login and no signup — just open the page and start removing backgrounds.

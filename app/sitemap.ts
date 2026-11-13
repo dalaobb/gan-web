@@ -1,12 +1,10 @@
 import type { MetadataRoute } from 'next';
 import { localizedPath, SITE_URL } from '@/lib/i18n';
 import { showUnfinished, unfinishedPaths } from '@/lib/launch';
+import { publicPaths } from '@/lib/tools';
 
 const paths = [
-  '/',
-  '/about',
-  '/privacy',
-  '/compress',
+  ...publicPaths,
   ...(showUnfinished ? unfinishedPaths : []),
 ];
 

@@ -241,3 +241,62 @@ export function compressMetadata(lang: Lang): Metadata {
     },
   };
 }
+
+const toolsCopy = {
+  en: {
+    title: 'Browser Image Tools: Remove BG, Compress, Convert | BgGone',
+    description:
+      'Free browser image tools: remove backgrounds, compress images, and convert HEIC, WebP, AVIF, PNG, and JPG without uploading.',
+    alt: 'BgGone browser image tools',
+  },
+  zh: {
+    title: '浏览器图片工具：去背景、压缩、格式转换 | BgGone',
+    description:
+      '免费的浏览器图片工具：去背景、压缩图片，以及转换 HEIC、WebP、AVIF、PNG、JPG，全程无需上传。',
+    alt: 'BgGone 浏览器图片工具',
+  },
+} as const;
+
+export function toolsMetadata(lang: Lang): Metadata {
+  const copy = toolsCopy[lang];
+  const canonical = new URL(localizedPath(lang, '/tools'), SITE_URL).href;
+  const enUrl = new URL(localizedPath('en', '/tools'), SITE_URL).href;
+  const zhUrl = new URL(localizedPath('zh', '/tools'), SITE_URL).href;
+  const ogImage = '/bggone-bg-remover.jpg';
+
+  return {
+    title: copy.title,
+    description: copy.description,
+    alternates: {
+      canonical,
+      languages: {
+        en: enUrl,
+        zh: zhUrl,
+        'x-default': enUrl,
+      },
+    },
+    openGraph: {
+      title: copy.title,
+      description: copy.description,
+      type: 'website',
+      url: canonical,
+      siteName: 'BgGone',
+      locale: lang === 'zh' ? 'zh_CN' : 'en_US',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          type: 'image/jpeg',
+          alt: copy.alt,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: copy.title,
+      description: copy.description,
+      images: [{ url: ogImage, alt: copy.alt }],
+    },
+  };
+}

@@ -1,5 +1,6 @@
 import { localizedPath, t, type Lang } from '@/lib/i18n';
 import { conversions } from '@/lib/conversions';
+import { passportPages } from '@/lib/passport/pages';
 import { publicTools } from '@/lib/tools';
 
 export default function ToolsIndex({ lang }: { lang: Lang }) {
@@ -42,6 +43,22 @@ export default function ToolsIndex({ lang }: { lang: Lang }) {
                 className="text-(--ink) hover:underline"
               >
                 {conversion.from} to {conversion.to}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <h2 className="mt-10 font-display text-2xl">
+          {lang === 'zh' ? '证件照' : 'Passport photos'}
+        </h2>
+        <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+          {passportPages.map((page) => (
+            <li key={page.slug}>
+              <a
+                href={localizedPath(lang, `/${page.slug}`)}
+                className="text-(--ink) hover:underline"
+              >
+                {page.copy[lang].h1}
               </a>
             </li>
           ))}

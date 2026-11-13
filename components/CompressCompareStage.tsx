@@ -60,12 +60,16 @@ export default function CompressCompareStage({
   lang,
   initialId,
   outputLabel,
+  compare = true,
+  title,
   onClose,
 }: {
   items: StageItem[];
   lang: Lang;
   initialId: string;
   outputLabel?: string;
+  compare?: boolean;
+  title?: string;
   onClose: () => void;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -222,10 +226,10 @@ export default function CompressCompareStage({
       className="fixed inset-0 z-50 flex flex-col bg-(--paper) p-3 sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-label={t(lang, 'compressStage')}
+      aria-label={title ?? t(lang, 'compressStage')}
     >
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-2xl">{t(lang, 'compressStage')}</h2>
+        <h2 className="text-2xl">{title ?? t(lang, 'compressStage')}</h2>
         <button
           type="button"
           className="flex h-9 w-9 items-center justify-center border border-(--line)"
@@ -285,29 +289,46 @@ export default function CompressCompareStage({
         ) : null}
         {box.w > 0 && imgW > 0 ? (
           <div className="checker absolute" style={{ left, top, width: dispW, height: dispH }}>
+            {!compare ? (
+              afterSrc || active.preview ? (
+                <img
+                  src={afterSrc ?? active.preview}
+                  alt={name}
+                  draggable={false}
+                  className="absolute inset-0 h-full w-full"
+                />
+              ) : null
+            ) : (
+              <>
+                {afterSrc ? (
+                  <img src={afterSrc} alt={name} draggable={false} className="absolute inset-0 h-full w-full" />
+                ) : null}
+                {active.preview ? (
+                  <img
+                    src={active.preview}
+                    alt={active.file.name}
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full"
+                    style={afterSrc ? { clipPath: `inset(0 ${rightInset}% 0 0)` } : undefined}
+                  />
+                ) : null}
+              </>
+            )}
+          </div>
+        ) : null}
+        {compare ? (
+          <>
+            <div className="pointer-events-none absolute top-3 left-3 bg-(--paper) px-2 py-1 text-xs">
+              {t(lang, 'compressOriginal')}
+            </div>
             {afterSrc ? (
-              <img src={afterSrc} alt={name} draggable={false} className="absolute inset-0 h-full w-full" />
+              <div className="pointer-events-none absolute top-3 right-3 bg-(--paper) px-2 py-1 text-xs">
+                {outputLabel ?? t(lang, 'compressOutput')}
+              </div>
             ) : null}
-            {active.preview ? (
-              <img
-                src={active.preview}
-                alt={active.file.name}
-                draggable={false}
-                className="absolute inset-0 h-full w-full"
-                style={afterSrc ? { clipPath: `inset(0 ${rightInset}% 0 0)` } : undefined}
-              />
-            ) : null}
-          </div>
+          </>
         ) : null}
-        <div className="pointer-events-none absolute top-3 left-3 bg-(--paper) px-2 py-1 text-xs">
-          {t(lang, 'compressOriginal')}
-        </div>
-        {afterSrc ? (
-          <div className="pointer-events-none absolute top-3 right-3 bg-(--paper) px-2 py-1 text-xs">
-            {outputLabel ?? t(lang, 'compressOutput')}
-          </div>
-        ) : null}
-        {afterSrc ? (
+        {compare && afterSrc ? (
         <div
           data-split
           role="slider"
@@ -401,7 +422,7 @@ export default function CompressCompareStage({
           </>
         ) : null}
       </div>
-      {afterSrc ? (
+      {compare && afterSrc ? (
         <p className="mt-2 text-center text-sm text-(--muted-ink)">{t(lang, 'compressStageHint')}</p>
       ) : null}
     </section>

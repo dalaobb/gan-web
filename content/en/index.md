@@ -58,6 +58,12 @@ Need a different file format? Convert HEIC, WebP, AVIF, PNG, and JPG in the brow
 
 [Convert images](/convert) · [All tools](/tools)
 
+## Make a passport photo
+
+Crop a portrait to a US, UK, India, Schengen, Canada, Australia, Japan, or China photo size, choose a background, and export a 4×6 print sheet. The photo stays on this device.
+
+[Passport photo maker](/passport-photo)
+
 ## FAQ
 ### Do I need to log in or create an account?
 No. BgGone needs no login and no signup — just open the page and start removing backgrounds.

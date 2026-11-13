@@ -1,5 +1,6 @@
 import { conversions } from '@/lib/conversions';
 import type { Lang } from '@/lib/i18n';
+import { passportPages } from '@/lib/passport/pages';
 
 export type ToolLink = {
   path: string;
@@ -32,11 +33,21 @@ export const publicTools: ToolLink[] = [
       zh: '在浏览器里转换 HEIC、WebP、AVIF、PNG、JPG。',
     },
   },
+  {
+    path: '/passport-photo',
+    name: { en: 'Passport photo maker', zh: '证件照制作' },
+    description: {
+      en: 'Crop passport and visa photos and export a print sheet locally.',
+      zh: '在本机裁切护照、签证照片并导出排版。',
+    },
+  },
 ];
 
 export const conversionPaths = conversions.map(
   (conversion) => `/${conversion.slug}`
 );
+
+export const passportPaths = passportPages.map((page) => `/${page.slug}`);
 
 export const publicPaths = [
   '/',
@@ -45,5 +56,7 @@ export const publicPaths = [
   '/tools',
   '/compress',
   '/convert',
+  '/passport-photo',
   ...conversionPaths,
+  ...passportPaths,
 ];

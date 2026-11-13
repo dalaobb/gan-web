@@ -1,46 +1,46 @@
-'use client';
+"use client";
 
-import { useEffect, useId, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
-import FileSaver from 'file-saver';
-import JSZip from 'jszip';
-import { formatFileSize } from '@/lib/utils';
-import CompressCompareStage from '@/components/CompressCompareStage';
-import { removeBackground } from '@/lib/utils/remover';
-import { isMobileDevice } from '@/lib/utils/remover/utils';
-import { smallModelKey } from '@/lib/utils/const';
-import { ImageType } from '@/lib/types';
-import { t, type Lang } from '@/lib/i18n';
-import { detectFaceMetrics, type FaceMetrics } from '@/lib/passport/face';
+import { useEffect, useId, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
+import FileSaver from "file-saver";
+import JSZip from "jszip";
+import { formatFileSize } from "@/lib/utils";
+import CompressCompareStage from "@/components/CompressCompareStage";
+import { removeBackground } from "@/lib/utils/remover";
+import { isMobileDevice } from "@/lib/utils/remover/utils";
+import { smallModelKey } from "@/lib/utils/const";
+import { ImageType } from "@/lib/types";
+import { t, type Lang } from "@/lib/i18n";
+import { detectFaceMetrics, type FaceMetrics } from "@/lib/passport/face";
 import {
   defaultPassportBackground,
   findPassportSpec,
   passportSpecs,
   type PassportSpecId,
-} from '@/lib/passport/specs';
+} from "@/lib/passport/specs";
 import {
   renderPassport,
   SHEET_HEIGHT,
   SHEET_WIDTH,
-} from '@/lib/passport/render';
-import { normalizePortrait } from '@/lib/passport/normalize';
-import { measureCutoutTop } from '@/lib/passport/measure';
+} from "@/lib/passport/render";
+import { normalizePortrait } from "@/lib/passport/normalize";
+import { measureCutoutTop } from "@/lib/passport/measure";
 
-const MODEL_CDN = 'https://cdn.bgg.one/remove-bg/model/1.5.3/';
+const MODEL_CDN = "https://cdn.bgg.one/remove-bg/model/1.5.3/";
 
-type Status = 'idle' | 'detect' | 'remove' | 'ready' | 'error';
+type Status = "idle" | "detect" | "remove" | "ready" | "error";
 
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
     image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('image'));
+    image.onerror = () => reject(new Error("image"));
     image.src = src;
   });
 }
 
 function revoke(url: string) {
-  if (url.startsWith('blob:')) URL.revokeObjectURL(url);
+  if (url.startsWith("blob:")) URL.revokeObjectURL(url);
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -75,7 +75,7 @@ function PassportOutputRow({
       setTimeout(() => setCopied(false), 1200);
     } catch (error) {
       console.error(error);
-      alert(t(lang, 'copyFailed'));
+      alert(t(lang, "copyFailed"));
     }
   }
 
@@ -94,17 +94,17 @@ function PassportOutputRow({
       </div>
       <div className="flex flex-wrap gap-2">
         <button type="button" className="btn btn-line" onClick={onPreview}>
-          {t(lang, 'preview')}
+          {t(lang, "preview")}
         </button>
         <button type="button" className="btn btn-line" onClick={copy}>
-          {copied ? t(lang, 'copied') : t(lang, 'copy')}
+          {copied ? t(lang, "copied") : t(lang, "copy")}
         </button>
         <button
           type="button"
           className="btn btn-solid"
           onClick={() => FileSaver.saveAs(blob, name)}
         >
-          {t(lang, 'save')}
+          {t(lang, "save")}
         </button>
       </div>
     </li>
@@ -113,16 +113,16 @@ function PassportOutputRow({
 
 export default function PassportDesk({
   lang,
-  initialSpecId = 'us',
+  initialSpecId = "us",
 }: {
   lang: Lang;
   initialSpecId?: PassportSpecId;
 }) {
   const fileInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const originalRef = useRef('');
-  const photoRef = useRef('');
-  const sheetRef = useRef('');
+  const originalRef = useRef("");
+  const photoRef = useRef("");
+  const sheetRef = useRef("");
   const previewRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{
     pointerId: number;
@@ -137,24 +137,24 @@ export default function PassportDesk({
   const [specId, setSpecId] = useState<PassportSpecId>(initialSpecId);
   const spec = findPassportSpec(specId) ?? passportSpecs[0];
   const [background, setBackground] = useState(() =>
-    defaultPassportBackground(spec)
+    defaultPassportBackground(spec),
   );
-  const [customBackground, setCustomBackground] = useState('#438edb');
+  const [customBackground, setCustomBackground] = useState("#438edb");
   const [zoom, setZoom] = useState(1);
   const [offsetX, setOffsetX] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
-  const [originalUrl, setOriginalUrl] = useState('');
-  const [photoUrl, setPhotoUrl] = useState('');
-  const [sheetUrl, setSheetUrl] = useState('');
+  const [originalUrl, setOriginalUrl] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [sheetUrl, setSheetUrl] = useState("");
   const [photo, setPhoto] = useState<Blob | null>(null);
   const [sheet, setSheet] = useState<Blob | null>(null);
   const [cutout, setCutout] = useState<Blob | null>(null);
   const [metrics, setMetrics] = useState<FaceMetrics | null>(null);
-  const [status, setStatus] = useState<Status>('idle');
-  const [error, setError] = useState('');
-  const [fileName, setFileName] = useState('passport-photo');
-  const [previewKind, setPreviewKind] = useState<'photo' | 'sheet' | null>(
-    null
+  const [status, setStatus] = useState<Status>("idle");
+  const [error, setError] = useState("");
+  const [fileName, setFileName] = useState("passport-photo");
+  const [previewKind, setPreviewKind] = useState<"photo" | "sheet" | null>(
+    null,
   );
   const [zipping, setZipping] = useState(false);
 
@@ -194,13 +194,13 @@ export default function PassportDesk({
           setSheet(result.sheet);
           setPhotoUrl(photoRef.current);
           setSheetUrl(sheetRef.current);
-          setStatus('ready');
-          setError('');
+          setStatus("ready");
+          setError("");
         })
         .catch(() => {
           if (cancelled) return;
-          setStatus('error');
-          setError(t(lang, 'passportFailed'));
+          setStatus("error");
+          setError(t(lang, "passportFailed"));
         });
     });
     return () => {
@@ -211,15 +211,15 @@ export default function PassportDesk({
 
   async function processFile(file?: File | null) {
     if (!file) return;
-    setStatus('detect');
-    setError('');
+    setStatus("detect");
+    setError("");
     setMetrics(null);
     setCutout(null);
     setPhoto(null);
     setSheet(null);
-    setPhotoUrl('');
-    setSheetUrl('');
-    setFileName(file.name.replace(/\.[^.]+$/, '') || 'passport-photo');
+    setPhotoUrl("");
+    setSheetUrl("");
+    setFileName(file.name.replace(/\.[^.]+$/, "") || "passport-photo");
 
     try {
       const input = await normalizePortrait(file);
@@ -230,15 +230,15 @@ export default function PassportDesk({
       const image = await loadImage(originalRef.current);
       const face = await detectFaceMetrics(image);
       setMetrics(face);
-      setStatus('remove');
+      setStatus("remove");
 
       const smallModel = !!window.localStorage.getItem(smallModelKey);
       const result = await removeBackground(input, {
-        device: 'gpu',
+        device: "gpu",
         publicPath: MODEL_CDN,
         proxyToWorker: true,
         debug: false,
-        model: smallModel || isMobileDevice() ? 'isnet_quint8' : 'isnet',
+        model: smallModel || isMobileDevice() ? "isnet_quint8" : "isnet",
         output: { format: ImageType.PNG, quality: 1 },
       });
 
@@ -252,11 +252,11 @@ export default function PassportDesk({
       }
       setCutout(result);
     } catch (err) {
-      console.error('Passport processing failed', err);
-      const message = err instanceof Error ? err.message : '';
-      setStatus('error');
+      console.error("Passport processing failed", err);
+      const message = err instanceof Error ? err.message : "";
+      setStatus("error");
       setError(
-        t(lang, message === 'no-face' ? 'passportNoFace' : 'passportFailed')
+        t(lang, message === "no-face" ? "passportNoFace" : "passportFailed"),
       );
     }
   }
@@ -279,8 +279,8 @@ export default function PassportDesk({
       zip.file(photoName, photo);
       zip.file(sheetName, sheet);
       FileSaver.saveAs(
-        await zip.generateAsync({ type: 'blob' }),
-        `${fileName}-passport.zip`
+        await zip.generateAsync({ type: "blob" }),
+        `${fileName}-passport.zip`,
       );
     } catch (error) {
       console.error(error);
@@ -289,23 +289,29 @@ export default function PassportDesk({
     }
   }
 
-  const busy = status === 'detect' || status === 'remove';
+  function downloadEach() {
+    if (!photo || !sheet) return;
+    FileSaver.saveAs(photo, photoName);
+    setTimeout(() => FileSaver.saveAs(sheet, sheetName), 300);
+  }
+
+  const busy = status === "detect" || status === "remove";
   const customSelected = !spec.backgrounds.some(
-    (choice) => choice.color === background
+    (choice) => choice.color === background,
   );
   const preview = photoUrl || originalUrl;
   const previewItems =
     photo && sheet && photoUrl && sheetUrl
       ? [
           {
-            id: 'photo',
+            id: "photo",
             file: new File([photo], photoName, { type: photo.type }),
             preview: photoUrl,
             width: spec.width,
             height: spec.height,
           },
           {
-            id: 'sheet',
+            id: "sheet",
             file: new File([sheet], sheetName, { type: sheet.type }),
             preview: sheetUrl,
             width: SHEET_WIDTH,
@@ -320,15 +326,15 @@ export default function PassportDesk({
       const items = event.clipboardData?.items;
       for (let index = 0; items && index < items.length; index += 1) {
         const file = items[index].getAsFile();
-        if (file?.type.startsWith('image/')) {
+        if (file?.type.startsWith("image/")) {
           event.preventDefault();
           void processFile(file);
           break;
         }
       }
     }
-    document.addEventListener('paste', handlePaste);
-    return () => document.removeEventListener('paste', handlePaste);
+    document.addEventListener("paste", handlePaste);
+    return () => document.removeEventListener("paste", handlePaste);
   }, [busy, lang]);
 
   useEffect(() => {
@@ -338,11 +344,11 @@ export default function PassportDesk({
       event.preventDefault();
       const step = event.deltaY > 0 ? -0.01 : 0.01;
       setZoom((value) =>
-        clamp(Math.round((value + step) * 100) / 100, 0.85, 1.15)
+        clamp(Math.round((value + step) * 100) / 100, 0.85, 1.15),
       );
     }
-    node.addEventListener('wheel', handleWheel, { passive: false });
-    return () => node.removeEventListener('wheel', handleWheel);
+    node.addEventListener("wheel", handleWheel, { passive: false });
+    return () => node.removeEventListener("wheel", handleWheel);
   }, [photo, photoUrl]);
 
   function onPreviewPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -377,18 +383,18 @@ export default function PassportDesk({
         clamp(
           drag.offsetX + (event.clientX - drag.startX) * drag.scaleX,
           -160,
-          160
-        )
-      )
+          160,
+        ),
+      ),
     );
     setOffsetY(
       Math.round(
         clamp(
           drag.offsetY + (event.clientY - drag.startY) * drag.scaleY,
           -160,
-          160
-        )
-      )
+          160,
+        ),
+      ),
     );
   }
 
@@ -408,16 +414,15 @@ export default function PassportDesk({
     <div className="pt-12">
       <header className="mx-auto max-w-3xl px-4 pb-8 text-center">
         <h1 className="text-4xl leading-tight sm:text-[2.75rem]">
-          {t(lang, 'passportTitle')}
+          {t(lang, "passportTitle")}
         </h1>
         <p className="mt-3 text-base text-(--muted-ink)">
-          {t(lang, 'passportLead')}
+          {t(lang, "passportLead")}
         </p>
       </header>
 
-      <div className="main-width grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="space-y-4">
-          <div className="glass-effect p-4">
+      <div className="main-width-wide grid gap-4 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_26rem]">
+        <div className="glass-effect p-4">
             <input
               ref={fileInputRef}
               type="file"
@@ -427,7 +432,7 @@ export default function PassportDesk({
               disabled={busy}
               onChange={(event) => {
                 void processFile(event.target.files?.[0]);
-                event.target.value = '';
+                event.target.value = "";
               }}
             />
             {preview ? (
@@ -463,97 +468,95 @@ export default function PassportDesk({
               >
                 <div className="bg-(--paper) px-8 py-6">
                   <p className="font-display text-3xl leading-tight text-(--ink)">
-                    {t(lang, 'passportDrop')}
+                    {t(lang, "passportDrop")}
                   </p>
                   <p className="mt-3 text-sm text-(--muted-ink)">
-                    {t(lang, 'passportDropHint')}
+                    {t(lang, "passportDropHint")}
                   </p>
                 </div>
               </label>
             )}
 
-            {status !== 'idle' ? (
+            {status !== "idle" ? (
               <p className="mt-3 text-sm text-(--muted-ink)">
-                {status === 'detect' ? t(lang, 'passportDetect') : null}
-                {status === 'remove' ? t(lang, 'passportRemove') : null}
-                {status === 'ready' ? t(lang, 'passportReady') : null}
-                {status === 'error' ? error : null}
+                {status === "detect" ? t(lang, "passportDetect") : null}
+                {status === "remove" ? t(lang, "passportRemove") : null}
+                {status === "ready" ? t(lang, "passportReady") : null}
+                {status === "error" ? error : null}
               </p>
             ) : null}
             {photo ? (
               <p className="mt-2 text-sm text-(--muted-ink)">
-                {t(lang, 'passportDragHint')}
+                {t(lang, "passportDragHint")}
               </p>
             ) : null}
-          </div>
+            <div className="pt-4">
+              <label className="block text-sm">
+                <span className="flex justify-between text-(--muted-ink)">
+                  <span>{t(lang, "passportHeadSize")}</span>
+                  <span>{Math.round(zoom * 100)}%</span>
+                </span>
+                <input
+                  type="range"
+                  min={0.85}
+                  max={1.15}
+                  step={0.01}
+                  value={zoom}
+                  disabled={busy || !metrics}
+                  className="mt-2 w-full"
+                  onChange={(event) => setZoom(Number(event.target.value))}
+                />
+              </label>
 
-          <div className="glass-effect space-y-4 p-4">
-            <label className="block text-sm">
-              <span className="flex justify-between text-(--muted-ink)">
-                <span>{t(lang, 'passportHeadSize')}</span>
-                <span>{Math.round(zoom * 100)}%</span>
-              </span>
-              <input
-                type="range"
-                min={0.85}
-                max={1.15}
-                step={0.01}
-                value={zoom}
+              <label className="block text-sm">
+                <span className="flex justify-between text-(--muted-ink)">
+                  <span>{t(lang, "passportMoveX")}</span>
+                  <span>{offsetX}</span>
+                </span>
+                <input
+                  type="range"
+                  min={-160}
+                  max={160}
+                  step={1}
+                  value={offsetX}
+                  disabled={busy || !metrics}
+                  className="mt-2 w-full"
+                  onChange={(event) => setOffsetX(Number(event.target.value))}
+                />
+              </label>
+
+              <label className="block text-sm">
+                <span className="flex justify-between text-(--muted-ink)">
+                  <span>{t(lang, "passportMoveY")}</span>
+                  <span>{offsetY}</span>
+                </span>
+                <input
+                  type="range"
+                  min={-160}
+                  max={160}
+                  step={1}
+                  value={offsetY}
+                  disabled={busy || !metrics}
+                  className="mt-2 w-full"
+                  onChange={(event) => setOffsetY(Number(event.target.value))}
+                />
+              </label>
+
+              <button
+                type="button"
+                className="btn btn-line"
                 disabled={busy || !metrics}
-                className="mt-2 w-full"
-                onChange={(event) => setZoom(Number(event.target.value))}
-              />
-            </label>
-
-            <label className="block text-sm">
-              <span className="flex justify-between text-(--muted-ink)">
-                <span>{t(lang, 'passportMoveX')}</span>
-                <span>{offsetX}</span>
-              </span>
-              <input
-                type="range"
-                min={-160}
-                max={160}
-                step={1}
-                value={offsetX}
-                disabled={busy || !metrics}
-                className="mt-2 w-full"
-                onChange={(event) => setOffsetX(Number(event.target.value))}
-              />
-            </label>
-
-            <label className="block text-sm">
-              <span className="flex justify-between text-(--muted-ink)">
-                <span>{t(lang, 'passportMoveY')}</span>
-                <span>{offsetY}</span>
-              </span>
-              <input
-                type="range"
-                min={-160}
-                max={160}
-                step={1}
-                value={offsetY}
-                disabled={busy || !metrics}
-                className="mt-2 w-full"
-                onChange={(event) => setOffsetY(Number(event.target.value))}
-              />
-            </label>
-
-            <button
-              type="button"
-              className="btn btn-line"
-              disabled={busy || !metrics}
-              onClick={resetAdjustments}
-            >
-              {t(lang, 'passportReset')}
-            </button>
-          </div>
+                onClick={resetAdjustments}
+              >
+                {t(lang, "passportReset")}
+              </button>
+            </div>
         </div>
 
-        <div className="glass-effect space-y-4 self-start p-4">
+        <div className="glass-effect flex flex-col gap-4 p-4">
           <div>
             <p className="text-sm text-(--muted-ink)">
-              {t(lang, 'passportCountry')}
+              {t(lang, "passportCountry")}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {passportSpecs.map((item) => (
@@ -564,8 +567,8 @@ export default function PassportDesk({
                   aria-pressed={item.id === specId}
                   className={
                     item.id === specId
-                      ? 'border border-(--ink) px-3 py-2 text-sm'
-                      : 'border border-(--line) px-3 py-2 text-sm text-(--muted-ink) hover:border-(--ink) hover:text-(--ink)'
+                      ? "border border-(--ink) px-3 py-2 text-sm"
+                      : "border border-(--line) px-3 py-2 text-sm text-(--muted-ink) hover:border-(--ink) hover:text-(--ink)"
                   }
                   onClick={() => setSpecId(item.id)}
                 >
@@ -573,12 +576,14 @@ export default function PassportDesk({
                 </button>
               ))}
             </div>
-            <p className="mt-2 text-sm text-(--muted-ink)">{spec.sizeLabel[lang]}</p>
+            <p className="mt-2 text-sm text-(--muted-ink)">
+              {spec.sizeLabel[lang]}
+            </p>
           </div>
 
           <div>
             <p className="text-sm text-(--muted-ink)">
-              {t(lang, 'passportBackground')}
+              {t(lang, "passportBackground")}
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {spec.backgrounds.map((choice) => (
@@ -589,8 +594,8 @@ export default function PassportDesk({
                   aria-pressed={choice.color === background}
                   className={
                     choice.color === background
-                      ? 'border border-(--ink) px-3 py-2 text-sm'
-                      : 'border border-(--line) px-3 py-2 text-sm text-(--muted-ink) hover:border-(--ink) hover:text-(--ink)'
+                      ? "border border-(--ink) px-3 py-2 text-sm"
+                      : "border border-(--line) px-3 py-2 text-sm text-(--muted-ink) hover:border-(--ink) hover:text-(--ink)"
                   }
                   onClick={() => setBackground(choice.color)}
                 >
@@ -604,14 +609,14 @@ export default function PassportDesk({
               <label
                 className={
                   customSelected
-                    ? 'border border-(--ink) px-3 py-2 text-sm'
-                    : 'border border-(--line) px-3 py-2 text-sm text-(--muted-ink) hover:border-(--ink) hover:text-(--ink)'
+                    ? "border border-(--ink) px-3 py-2 text-sm"
+                    : "border border-(--line) px-3 py-2 text-sm text-(--muted-ink) hover:border-(--ink) hover:text-(--ink)"
                 }
               >
                 <input
                   type="color"
                   value={customBackground}
-                  aria-label={t(lang, 'passportCustomColor')}
+                  aria-label={t(lang, "passportCustomColor")}
                   className="mr-2 h-4 w-4 cursor-pointer border border-(--line) bg-transparent p-0 align-middle"
                   onChange={(event) => {
                     const color = event.target.value;
@@ -619,7 +624,7 @@ export default function PassportDesk({
                     setBackground(color);
                   }}
                 />
-                {t(lang, 'passportCustomColor')}
+                {t(lang, "passportCustomColor")}
               </label>
             </div>
           </div>
@@ -630,31 +635,42 @@ export default function PassportDesk({
               className="btn btn-line cursor-pointer"
               aria-disabled={busy}
             >
-              {t(lang, 'passportChange')}
+              {t(lang, "passportChange")}
             </label>
           </div>
 
-          <p className="text-sm text-(--muted-ink)">{spec.note[lang]}</p>
-          <p className="text-sm text-(--muted-ink)">{t(lang, 'passportNote')}</p>
+          <div className="mt-auto space-y-3 border-t border-(--line) pt-4">
+            <p className="text-sm text-(--muted-ink)">{spec.note[lang]}</p>
+            <p className="text-sm text-(--muted-ink)">
+              {t(lang, "passportNote")}
+            </p>
+          </div>
         </div>
       </div>
 
       {photo && sheet && photoUrl && sheetUrl ? (
-        <div className="main-width mt-6">
+        <div className="main-width-wide mt-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-display text-2xl">
-              {t(lang, 'passportOutput')}
+              {t(lang, "passportOutput")}
             </h2>
-            <button
-              type="button"
-              className="btn btn-line"
-              disabled={zipping}
-              onClick={downloadAll}
-            >
-              {zipping
-                ? t(lang, 'processing')
-                : t(lang, 'downloadAllZip')}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-line"
+                onClick={downloadEach}
+              >
+                {t(lang, "download")}
+              </button>
+              <button
+                type="button"
+                className="btn btn-line"
+                disabled={zipping}
+                onClick={downloadAll}
+              >
+                {zipping ? t(lang, "processing") : t(lang, "downloadAllZip")}
+              </button>
+            </div>
           </div>
           <ul className="mt-3 space-y-2">
             <PassportOutputRow
@@ -664,7 +680,7 @@ export default function PassportDesk({
               url={photoUrl}
               width={spec.width}
               height={spec.height}
-              onPreview={() => setPreviewKind('photo')}
+              onPreview={() => setPreviewKind("photo")}
             />
             <PassportOutputRow
               lang={lang}
@@ -673,7 +689,7 @@ export default function PassportDesk({
               url={sheetUrl}
               width={SHEET_WIDTH}
               height={SHEET_HEIGHT}
-              onPreview={() => setPreviewKind('sheet')}
+              onPreview={() => setPreviewKind("sheet")}
             />
           </ul>
         </div>
@@ -685,7 +701,7 @@ export default function PassportDesk({
           lang={lang}
           initialId={previewKind}
           compare={false}
-          title={t(lang, 'preview')}
+          title={t(lang, "preview")}
           onClose={() => setPreviewKind(null)}
         />
       ) : null}

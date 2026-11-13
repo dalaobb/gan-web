@@ -21,7 +21,7 @@ export default function PassportCopy({
   const others = passportPages.filter((page) => `/${page.slug}` !== path);
 
   return (
-    <div className="main-width mt-5 px-4 pt-4 pb-16 md:mt-8">
+    <div className="main-width-wide mt-5 px-4 pt-4 pb-16 md:mt-8">
       <div className="prose prose-neutral max-w-none">
         <p>{copy.intro}</p>
 

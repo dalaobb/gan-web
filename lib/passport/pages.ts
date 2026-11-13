@@ -677,7 +677,7 @@ export function passportPageMetadata(
   const canonical = new URL(localizedPath(lang, '/passport-photo'), SITE_URL).href;
   const enUrl = new URL(localizedPath('en', '/passport-photo'), SITE_URL).href;
   const zhUrl = new URL(localizedPath('zh', '/passport-photo'), SITE_URL).href;
-  const ogImage = '/bggone-bg-remover.jpg';
+  const ogImage = '/bggone-passport.jpg';
 
   return {
     title: copy.title,

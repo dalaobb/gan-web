@@ -56,11 +56,11 @@ button:disabled {
 }
 
 .main-width {
-  @apply mx-auto sm:w-lg md:w-xl lg:w-2xl xl:w-3xl 2xl:w-4xl;
+  @apply mx-auto w-full sm:w-lg md:w-xl lg:w-2xl xl:w-3xl 2xl:w-4xl;
 }
 
 .main-width-wide {
-  @apply mx-auto sm:w-lg md:w-xl lg:w-3xl xl:w-4xl 2xl:w-5xl;
+  @apply mx-auto w-full sm:w-lg md:w-xl lg:w-3xl xl:w-4xl 2xl:w-5xl;
 }
 
 .main-max-width {

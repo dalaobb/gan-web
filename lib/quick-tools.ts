@@ -5,7 +5,9 @@ export type QuickToolKey =
   | 'blur-background'
   | 'white-background'
   | 'remove-exif'
-  | 'blur-face';
+  | 'blur-face'
+  | 'images-to-pdf'
+  | 'pdf-to-jpg';
 
 export type QuickToolCopy = {
   title: string;
@@ -312,6 +314,152 @@ export const quickToolPages: QuickToolPage[] = [
           {
             q: '什么样的照片效果最好？',
             a: '正面、光线充足的人脸识别最稳定。',
+          },
+        ],
+      },
+    },
+  },
+  {
+    slug: 'images-to-pdf',
+    key: 'images-to-pdf',
+    ogImage: '/bggone-compress.jpg',
+    copy: {
+      en: {
+        title: 'Images to PDF Converter, No Upload | BgGone',
+        description:
+          'Combine JPG, PNG, WebP, AVIF, and HEIC images into one PDF in your browser. Reorder the pages and download without uploading.',
+        h1: 'Images to PDF',
+        lead: 'Put several images into one PDF, locally in your browser.',
+        intro:
+          'Add the images you want, put them in order, and export one PDF. Each image becomes an A4 page with white margins, and the files stay on this device.',
+        bullets: [
+          'Combine multiple images',
+          'Reorder pages before export',
+          'A4 pages with white margins',
+          'No upload and no login',
+        ],
+        faq: [
+          {
+            q: 'Which image formats work?',
+            a: 'JPEG, PNG, WebP, AVIF, and HEIC are accepted. Each image is placed on its own A4 page.',
+          },
+          {
+            q: 'Can I change the page order?',
+            a: 'Yes. Use the up and down buttons in the file list before creating the PDF.',
+          },
+          {
+            q: 'Are the images uploaded?',
+            a: 'No. The PDF is assembled in this browser, and the files stay on your device.',
+          },
+          {
+            q: 'Does it keep transparency?',
+            a: 'Transparent areas are placed on a white page background, which is standard for PDF output.',
+          },
+        ],
+      },
+      zh: {
+        title: '图片转 PDF，无需上传 | BgGone',
+        description:
+          '在浏览器里把 JPG、PNG、WebP、AVIF、HEIC 图片合并成一个 PDF，可调整页面顺序，无需上传。',
+        h1: '图片转 PDF',
+        lead: '把多张图片合成一个 PDF，全程在本机完成。',
+        intro:
+          '加入图片、调整顺序，然后导出 PDF。每张图片会成为一页带白边的 A4 页面，文件留在这台设备上。',
+        bullets: [
+          '合并多张图片',
+          '导出前调整页面顺序',
+          'A4 页面，带白边',
+          '无需上传、无需登录',
+        ],
+        faq: [
+          {
+            q: '支持哪些图片格式？',
+            a: '支持 JPEG、PNG、WebP、AVIF、HEIC。每张图片会单独放在一页 A4 上。',
+          },
+          {
+            q: '可以调整页面顺序吗？',
+            a: '可以。生成 PDF 前，用文件列表里的上移/下移按钮调整。',
+          },
+          {
+            q: '图片会被上传吗？',
+            a: '不会。PDF 在浏览器里生成，文件留在本机。',
+          },
+          {
+            q: '会保留透明背景吗？',
+            a: '透明区域会放在白色页面背景上，这是 PDF 的常规处理方式。',
+          },
+        ],
+      },
+    },
+  },
+  {
+    slug: 'pdf-to-jpg',
+    key: 'pdf-to-jpg',
+    ogImage: '/bggone-compress.jpg',
+    copy: {
+      en: {
+        title: 'PDF to JPG Converter, No Upload | BgGone',
+        description:
+          'Turn PDF pages into JPG or PNG images in your browser. Download pages one by one or as a ZIP, without uploading.',
+        h1: 'PDF to Images',
+        lead: 'Render each PDF page as a JPG or PNG, locally.',
+        intro:
+          'Choose a PDF and convert its pages into images. The pages are rendered at 2× resolution, and you can download them one by one or as a ZIP.',
+        bullets: [
+          'JPG or PNG output',
+          '2× page resolution',
+          'Download one page or a ZIP',
+          'No upload and no login',
+        ],
+        faq: [
+          {
+            q: 'Can I get PNG instead of JPG?',
+            a: 'Yes. Choose PNG before converting to keep lossless page images.',
+          },
+          {
+            q: 'Are all pages converted?',
+            a: 'Yes. Each page becomes a separate image in the results list.',
+          },
+          {
+            q: 'Is the PDF uploaded?',
+            a: 'No. PDF parsing and page rendering run in this browser.',
+          },
+          {
+            q: 'Why is the image larger than the PDF?',
+            a: 'Pages are rendered at 2× resolution as raster images, so the output can be larger than the original PDF.',
+          },
+        ],
+      },
+      zh: {
+        title: 'PDF 转 JPG，无需上传 | BgGone',
+        description:
+          '在浏览器里把 PDF 页面转成 JPG 或 PNG，可逐页下载或打包下载，无需上传。',
+        h1: 'PDF 转图片',
+        lead: '在本机把 PDF 每一页渲染成 JPG 或 PNG。',
+        intro:
+          '选择 PDF，把页面转换成图片。页面按 2 倍分辨率渲染，可以逐页下载或打包成 ZIP。',
+        bullets: [
+          '输出 JPG 或 PNG',
+          '2 倍页面分辨率',
+          '逐页下载或打包下载',
+          '无需上传、无需登录',
+        ],
+        faq: [
+          {
+            q: '可以输出 PNG 吗？',
+            a: '可以。转换前选择 PNG，页面图片会保持无损。',
+          },
+          {
+            q: '所有页面都会转换吗？',
+            a: '会。每一页都会在结果列表里生成一张图片。',
+          },
+          {
+            q: 'PDF 会被上传吗？',
+            a: '不会。PDF 解析和页面渲染都在浏览器里完成。',
+          },
+          {
+            q: '为什么图片比 PDF 大？',
+            a: '页面按 2 倍分辨率渲染成位图，输出体积可能比原 PDF 大。',
           },
         ],
       },

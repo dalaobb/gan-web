@@ -28,5 +28,13 @@ export function navLinks(lang: Lang) {
       href: localizedPath(lang, '/blur-face'),
       label: t(lang, 'blurFaceNav'),
     },
+    {
+      href: localizedPath(lang, '/images-to-pdf'),
+      label: t(lang, 'imagesToPdfNav'),
+    },
+    {
+      href: localizedPath(lang, '/pdf-to-jpg'),
+      label: t(lang, 'pdfToImagesNav'),
+    },
   ];
 }

@@ -22,6 +22,10 @@ const quickToolRoutes = [
   '/zh/remove-exif',
   '/blur-face',
   '/zh/blur-face',
+  '/images-to-pdf',
+  '/zh/images-to-pdf',
+  '/pdf-to-jpg',
+  '/zh/pdf-to-jpg',
 ];
 
 const passportRoutes = [
@@ -73,6 +77,15 @@ const nextConfig = {
         source,
         headers: isolatedHeaders,
       })),
+      {
+        source: '/pdf/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         source: '/eruda.js',
         headers: [

@@ -214,17 +214,25 @@ export default function StripExifDesk({
   const doneCount = items.filter((item) => item.status === 'done').length;
   const previewItem = items.find((item) => item.id === previewId) ?? null;
   const previewItems = previewItem
-    ? [
-        {
-          id: previewItem.id,
-          file: previewItem.file,
-          preview: previewItem.preview,
-          result: previewItem.result?.blob,
-          resultName: previewItem.result?.name,
-          width: previewItem.result?.width,
-          height: previewItem.result?.height,
-        },
-      ]
+    ? previewItem.result
+      ? items
+          .filter((item) => item.result)
+          .map((item) => ({
+            id: item.id,
+            file: item.file,
+            preview: item.preview,
+            result: item.result?.blob,
+            resultName: item.result?.name,
+            width: item.result?.width,
+            height: item.result?.height,
+          }))
+      : [
+          {
+            id: previewItem.id,
+            file: previewItem.file,
+            preview: previewItem.preview,
+          },
+        ]
     : [];
 
   return (

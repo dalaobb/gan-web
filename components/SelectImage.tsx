@@ -128,7 +128,7 @@ export default function SelectImage({
 
   return (
     <>
-      <div className="relative m-auto h-64 text-sm sm:h-72 md:h-80">
+      <div className="relative m-auto min-h-72 w-full text-sm">
         <input
           type="file"
           accept="image/*"
@@ -143,12 +143,10 @@ export default function SelectImage({
           className="drop-zone absolute inset-0 flex cursor-pointer items-center justify-center border-2 border-dashed text-center"
         >
           <div className="bg-(--paper) px-8 py-6">
-            <p className="font-display text-4xl leading-none tracking-tight text-(--ink) sm:text-5xl">
+            <p className="upload-title">
               {dragging ? t(lang, 'dropRelease') : t(lang, 'dropTitle')}
             </p>
-            <p className="mt-3 text-sm text-(--muted-ink)">
-              {t(lang, 'dropHint')}
-            </p>
+            <p className="upload-hint">{t(lang, 'dropHint')}</p>
           </div>
         </label>
       </div>

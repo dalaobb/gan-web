@@ -8,6 +8,7 @@ import { classifyFile } from '@/lib/compress/files';
 import { cachedHeic, forgetHeic, previewJpeg } from '@/lib/compress/heic';
 import { t, type Lang } from '@/lib/i18n';
 import CompressCompareStage from '@/components/CompressCompareStage';
+import FileListRow from '@/components/FileListRow';
 
 const FORMATS: OutputFormat[] = ['keep', 'jpeg', 'webp', 'png'];
 const QUALITIES: QualityId[] = ['smaller', 'balanced', 'high'];
@@ -122,24 +123,57 @@ function CompressRow({
   }
 
   return (
-    <li
-      className={`glass-effect flex flex-wrap items-center gap-3 p-3 ${
-        item.status === 'working' ? 'processing' : ''
-      }`}
+    <FileListRow
+      processing={item.status === 'working'}
+      onRemove={onClose}
+      removeLabel={t(lang, 'compressClose')}
+      thumbnail={
+        item.preview ? (
+          <img
+            src={item.preview}
+            alt=""
+            className="h-14 w-14 shrink-0 border border-(--line) object-cover"
+          />
+        ) : (
+          <span className="inline-block h-14 w-14 shrink-0 border border-(--line)" />
+        )
+      }
+      actions={
+        <>
+          <button type="button" className="btn btn-line" onClick={onPreview}>
+            {t(lang, 'preview')}
+          </button>
+          {item.result && item.resultName ? (
+            <>
+              <button type="button" className="btn btn-line" onClick={copyFile}>
+                {copied ? t(lang, 'copied') : t(lang, 'copy')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-solid"
+                onClick={() =>
+                  FileSaver.saveAs(item.result as Blob, item.resultName!)
+                }
+              >
+                {t(lang, 'save')}
+              </button>
+            </>
+          ) : null}
+        </>
+      }
     >
-      {item.preview ? (
-        <img src={item.preview} alt="" className="h-14 w-14 shrink-0 border border-(--line) object-cover" />
-      ) : (
-        <span className="inline-block h-14 w-14 shrink-0 border border-(--line)" />
-      )}
-      <div className="min-w-0 flex-1 basis-40">
-        <p className="truncate text-sm">{name}</p>
-        <p className="mt-1 text-sm text-(--muted-ink)">
-          {item.status === 'working' ? t(lang, 'processing') : null}
-          {item.status === 'error' ? t(lang, 'compressFailed') : null}
-          {item.status === 'ready' ? formatBytes(item.file.size) : null}
-          {item.status === 'done' && item.result
-            ? t(lang, item.result.size > item.file.size ? 'compressGrew' : 'compressSaved', {
+      <p className="truncate text-sm">{name}</p>
+      <p className="mt-1 text-sm text-(--muted-ink)">
+        {item.status === 'working' ? t(lang, 'processing') : null}
+        {item.status === 'error' ? t(lang, 'compressFailed') : null}
+        {item.status === 'ready' ? formatBytes(item.file.size) : null}
+        {item.status === 'done' && item.result
+          ? t(
+              lang,
+              item.result.size > item.file.size
+                ? 'compressGrew'
+                : 'compressSaved',
+              {
                 before: formatBytes(item.file.size),
                 after: formatBytes(item.result.size),
                 pct: String(
@@ -147,45 +181,21 @@ function CompressRow({
                     ? grewPercent(item.file.size, item.result.size)
                     : savedPercent(item.file.size, item.result.size)
                 ),
-              })
-            : null}
-          {item.status === 'done' && item.width && item.height
-            ? ` · ${item.width}×${item.height}`
-            : null}
-          {item.gif ? ` · ${t(lang, 'compressGifFrame')}` : null}
-          {item.status === 'done' && item.cap && item.result && item.result.size > item.cap
-            ? ` · ${t(lang, 'compressOver', { size: formatBytes(item.cap) })}`
-            : null}
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <button type="button" className="btn btn-line" onClick={onPreview}>
-          {t(lang, 'preview')}
-        </button>
-        {item.result && item.resultName ? (
-          <>
-            <button type="button" className="btn btn-line" onClick={copyFile}>
-              {copied ? t(lang, 'copied') : t(lang, 'copy')}
-            </button>
-            <button
-              type="button"
-              className="btn btn-solid"
-              onClick={() => FileSaver.saveAs(item.result as Blob, item.resultName)}
-            >
-              {t(lang, 'save')}
-            </button>
-          </>
-        ) : null}
-      </div>
-      <button
-        type="button"
-        className="flex h-7 w-7 shrink-0 items-center justify-center border border-(--line)"
-        onClick={onClose}
-        aria-label={t(lang, 'compressClose')}
-      >
-        ×
-      </button>
-    </li>
+              }
+            )
+          : null}
+        {item.status === 'done' && item.width && item.height
+          ? ` · ${item.width}×${item.height}`
+          : null}
+        {item.gif ? ` · ${t(lang, 'compressGifFrame')}` : null}
+        {item.status === 'done' &&
+        item.cap &&
+        item.result &&
+        item.result.size > item.cap
+          ? ` · ${t(lang, 'compressOver', { size: formatBytes(item.cap) })}`
+          : null}
+      </p>
+    </FileListRow>
   );
 }
 
@@ -634,7 +644,7 @@ export default function CompressDesk({
       </header>
 
       <div className="main-width">
-        <div className="relative m-auto h-64 text-sm sm:h-72 md:h-80">
+        <div className="relative m-auto min-h-72 w-full text-sm">
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.heic,.heif"
@@ -653,10 +663,10 @@ export default function CompressDesk({
             className="drop-zone absolute inset-0 flex cursor-pointer items-center justify-center border-2 border-dashed text-center"
           >
             <div className="bg-(--paper) px-8 py-6">
-              <p className="font-display text-4xl leading-none tracking-tight text-(--ink) sm:text-5xl">
+              <p className="upload-title">
                 {dragging ? t(lang, 'dropRelease') : t(lang, 'dropTitle')}
               </p>
-              <p className="mt-3 text-sm text-(--muted-ink)">{t(lang, 'dropHint')}</p>
+              <p className="upload-hint">{t(lang, 'dropHint')}</p>
             </div>
           </label>
         </div>

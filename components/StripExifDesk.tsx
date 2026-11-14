@@ -9,6 +9,7 @@ import { stripMetadata } from '@/lib/image/strip';
 import { readMetadata, type MetadataSummary } from '@/lib/image/metadata';
 import UploadBox from '@/components/tools/UploadBox';
 import CompressCompareStage from '@/components/CompressCompareStage';
+import FileListRow from '@/components/FileListRow';
 
 type Result = {
   blob: Blob;
@@ -243,18 +244,16 @@ export default function StripExifDesk({
       </header>
 
       <div className="main-width">
-        <div className="glass-effect p-4">
-          <UploadBox
-            lang={lang}
-            preview=""
-            busy={running}
-            multiple
-            onFiles={addFiles}
-          />
-          <p className="mt-3 text-sm text-(--muted-ink)">
-            {t(lang, 'exifNote')}
-          </p>
-        </div>
+        <UploadBox
+          lang={lang}
+          preview=""
+          busy={running}
+          multiple
+          onFiles={addFiles}
+        />
+        <p className="mt-3 text-sm text-(--muted-ink)">
+          {t(lang, 'exifNote')}
+        </p>
       </div>
 
       {items.length ? (
@@ -308,110 +307,104 @@ export default function StripExifDesk({
       {items.length ? (
         <ul className="main-width mt-4 space-y-2">
           {items.map((item) => (
-            <li
+            <FileListRow
               key={item.id}
-              className={`glass-effect flex flex-wrap items-center gap-3 p-3 ${
-                item.status === 'working' ? 'processing' : ''
-              }`}
+              processing={item.status === 'working'}
+              onRemove={() => removeItem(item.id)}
+              removeLabel={t(lang, 'compressClose')}
+              removeDisabled={running}
+              thumbnail={
+                <img
+                  src={item.result?.url ?? item.preview}
+                  alt=""
+                  className="h-14 w-14 shrink-0 border border-(--line) bg-white object-cover"
+                />
+              }
+              actions={
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-line"
+                    onClick={() => setPreviewId(item.id)}
+                  >
+                    {t(lang, 'preview')}
+                  </button>
+                  {item.result ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-line"
+                        onClick={() => copyResult(item, item.result!)}
+                      >
+                        {copiedId === item.id
+                          ? t(lang, 'copied')
+                          : t(lang, 'copy')}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-solid"
+                        onClick={() =>
+                          FileSaver.saveAs(item.result!.blob, item.result!.name)
+                        }
+                      >
+                        {t(lang, 'save')}
+                      </button>
+                    </>
+                  ) : null}
+                </>
+              }
             >
-              <img
-                src={item.result?.url ?? item.preview}
-                alt=""
-                className="h-14 w-14 shrink-0 border border-(--line) bg-white object-cover"
-              />
-              <div className="min-w-0 flex-1 basis-40">
-                <p className="truncate text-sm">
-                  {item.result?.name ?? item.file.name}
-                </p>
-                <p className="mt-1 text-sm text-(--muted-ink)">
-                  {item.status === 'working'
-                    ? t(lang, 'processing')
-                    : item.status === 'error'
-                      ? t(lang, 'toolFailed')
-                      : item.result
-                        ? t(
-                            lang,
-                            item.result.blob.size > item.file.size
-                              ? 'compressGrew'
-                              : 'compressSaved',
-                            {
-                              before: formatFileSize(item.file.size),
-                              after: formatFileSize(item.result.blob.size),
-                              pct: String(
-                                item.result.blob.size > item.file.size
-                                  ? grewPercent(
-                                      item.file.size,
-                                      item.result.blob.size
-                                    )
-                                  : savedPercent(
-                                      item.file.size,
-                                      item.result.blob.size
-                                    )
-                              ),
-                            }
-                          )
-                        : formatFileSize(item.file.size)}
-                  {item.result
-                    ? ` · ${item.result.width}×${item.result.height}`
-                    : null}
-                </p>
-                <p className="mt-1 text-xs text-(--muted-ink)">
-                  {item.cleaned && item.result
-                    ? item.cleaned.hasAny
-                      ? t(lang, 'metadataStill')
-                      : item.metadata?.hasAny
-                        ? t(lang, 'metadataRemoved')
-                        : t(lang, 'metadataNone')
-                    : item.metadata
-                      ? item.metadata.hasAny
-                        ? t(lang, 'metadataFound', {
-                            count: String(item.metadata.fields),
-                          })
-                        : t(lang, 'metadataNone')
-                      : t(lang, 'metadataChecking')}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  className="btn btn-line"
-                  onClick={() => setPreviewId(item.id)}
-                >
-                  {t(lang, 'preview')}
-                </button>
-                {item.result ? (
-                  <>
-                    <button
-                      type="button"
-                      className="btn btn-line"
-                      onClick={() => copyResult(item, item.result!)}
-                    >
-                      {copiedId === item.id
-                        ? t(lang, 'copied')
-                        : t(lang, 'copy')}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-solid"
-                      onClick={() =>
-                        FileSaver.saveAs(item.result!.blob, item.result!.name)
-                      }
-                    >
-                      {t(lang, 'save')}
-                    </button>
-                  </>
-                ) : null}
-                <button
-                  type="button"
-                  className="flex h-7 w-7 shrink-0 items-center justify-center border border-(--line)"
-                  disabled={running}
-                  onClick={() => removeItem(item.id)}
-                  aria-label={t(lang, 'compressClose')}
-                >
-                  ×
-                </button>
-              </div>
-            </li>
+              <p className="truncate text-sm">
+                {item.result?.name ?? item.file.name}
+              </p>
+              <p className="mt-1 text-sm text-(--muted-ink)">
+                {item.status === 'working'
+                  ? t(lang, 'processing')
+                  : item.status === 'error'
+                    ? t(lang, 'toolFailed')
+                    : item.result
+                      ? t(
+                          lang,
+                          item.result.blob.size > item.file.size
+                            ? 'compressGrew'
+                            : 'compressSaved',
+                          {
+                            before: formatFileSize(item.file.size),
+                            after: formatFileSize(item.result.blob.size),
+                            pct: String(
+                              item.result.blob.size > item.file.size
+                                ? grewPercent(
+                                    item.file.size,
+                                    item.result.blob.size
+                                  )
+                                : savedPercent(
+                                    item.file.size,
+                                    item.result.blob.size
+                                  )
+                            ),
+                          }
+                        )
+                      : formatFileSize(item.file.size)}
+                {item.result
+                  ? ` · ${item.result.width}×${item.result.height}`
+                  : null}
+              </p>
+              <p className="mt-1 text-xs text-(--muted-ink)">
+                {item.cleaned && item.result
+                  ? item.cleaned.hasAny
+                    ? t(lang, 'metadataStill')
+                    : item.metadata?.hasAny
+                      ? t(lang, 'metadataRemoved')
+                      : t(lang, 'metadataNone')
+                  : item.metadata
+                    ? item.metadata.hasAny
+                      ? t(lang, 'metadataFound', {
+                          count: String(item.metadata.fields),
+                        })
+                      : t(lang, 'metadataNone')
+                    : t(lang, 'metadataChecking')}
+              </p>
+            </FileListRow>
           ))}
         </ul>
       ) : null}

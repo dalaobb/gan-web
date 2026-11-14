@@ -111,19 +111,18 @@ export default function GifCompressDesk({
       </header>
 
       <div className="main-width">
-        <div className="glass-effect p-4">
-          <UploadBox
-            lang={lang}
-            preview={preview}
-            afterPreview={result?.url}
-            accept="image/gif,.gif"
-            busy={running}
-            onFile={takeFile}
-          />
-          {error ? (
-            <p className="mt-3 text-sm text-(--muted-ink)">{error}</p>
-          ) : null}
-        </div>
+        <UploadBox
+          lang={lang}
+          preview={preview}
+          afterPreview={result?.url}
+          accept="image/gif,.gif"
+          busy={running}
+          single
+          onFile={takeFile}
+        />
+        {error ? (
+          <p className="mt-3 text-sm text-(--muted-ink)">{error}</p>
+        ) : null}
 
         <div className="glass-effect mt-4 p-4">
           <p className="text-sm text-(--muted-ink)">{t(lang, 'gifTarget')}</p>

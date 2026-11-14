@@ -114,12 +114,11 @@ export default function PdfToImagesDesk({
       </header>
 
       <div className="main-width">
-        <div className="glass-effect p-4">
-          <input
-            id={inputId}
+        <input
+          id={inputId}
             type="file"
             accept="application/pdf,.pdf"
-            className="h-0 opacity-0"
+            className="sr-only"
             disabled={running}
             onChange={(event) => {
               takeFile(event.target.files?.[0]);
@@ -128,7 +127,7 @@ export default function PdfToImagesDesk({
           />
           <label
             htmlFor={inputId}
-            className="drop-zone flex min-h-52 cursor-pointer flex-col items-center justify-center border-2 border-dashed p-4 text-center"
+            className="drop-zone flex min-h-72 w-full cursor-pointer flex-col items-center justify-center border-2 border-dashed p-4 text-center"
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => {
               event.preventDefault();
@@ -146,19 +145,14 @@ export default function PdfToImagesDesk({
               </div>
             ) : (
               <div className="bg-(--paper) px-8 py-6">
-                <p className="font-display text-3xl leading-tight text-(--ink)">
-                  {t(lang, 'pdfOpen')}
-                </p>
-                <p className="mt-3 text-sm text-(--muted-ink)">
-                  {t(lang, 'pdfDropHint')}
-                </p>
+                <p className="upload-title">{t(lang, 'pdfOpen')}</p>
+                <p className="upload-hint">{t(lang, 'pdfDropHint')}</p>
               </div>
             )}
           </label>
-          <p className="mt-3 text-sm text-(--muted-ink)">
-            {t(lang, 'pdfToImagesNote')}
-          </p>
-        </div>
+        <p className="mt-3 text-sm text-(--muted-ink)">
+          {t(lang, 'pdfToImagesNote')}
+        </p>
 
         <div className="glass-effect mt-4 flex flex-wrap items-center justify-between gap-2 p-4">
           <div className="flex flex-wrap items-center gap-2">

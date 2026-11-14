@@ -12,6 +12,7 @@ export default function UploadBox({
   afterLabel,
   accept,
   busy,
+  single = false,
   multiple = false,
   onFile,
   onFiles,
@@ -23,6 +24,7 @@ export default function UploadBox({
   afterLabel?: string;
   accept?: string;
   busy: boolean;
+  single?: boolean;
   multiple?: boolean;
   onFile?: (file: File) => void;
   onFiles?: (files: File[]) => void;
@@ -50,7 +52,7 @@ export default function UploadBox({
           accept ??
           'image/jpeg,image/png,image/webp,image/heic,image/heif,image/avif,.jpg,.jpeg,.png,.webp,.heic,.heif,.avif'
         }
-        className="h-0 opacity-0"
+        className="sr-only"
         disabled={busy}
         onChange={(event) => {
           take(event.target.files);
@@ -59,7 +61,7 @@ export default function UploadBox({
       />
       <label
         htmlFor={inputId}
-        className="drop-zone flex min-h-72 cursor-pointer items-center justify-center border-2 border-dashed p-4 text-center"
+        className="drop-zone flex min-h-72 w-full cursor-pointer items-center justify-center border-2 border-dashed p-4 text-center"
         onDragOver={(event) => event.preventDefault()}
         onDrop={(event) => {
           event.preventDefault();
@@ -103,12 +105,10 @@ export default function UploadBox({
           )
         ) : (
           <div className="bg-(--paper) px-8 py-6">
-            <p className="font-display text-3xl leading-tight text-(--ink)">
-              {t(lang, 'dropTitle')}
+            <p className="upload-title">
+              {t(lang, single ? 'dropTitleSingle' : 'dropTitle')}
             </p>
-            <p className="mt-3 text-sm text-(--muted-ink)">
-              {t(lang, 'dropHint')}
-            </p>
+            <p className="upload-hint">{t(lang, 'dropHint')}</p>
           </div>
         )}
       </label>

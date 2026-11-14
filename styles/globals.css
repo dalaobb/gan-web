@@ -90,6 +90,14 @@ button:disabled {
   background-color: color-mix(in srgb, var(--ink) 14%, var(--paper));
 }
 
+.upload-title {
+  @apply font-display text-3xl leading-tight tracking-tight text-(--ink) sm:text-4xl;
+}
+
+.upload-hint {
+  @apply mt-3 text-sm text-(--muted-ink);
+}
+
 .checker {
   background-color: #fff;
   background-image:

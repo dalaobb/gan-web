@@ -6,6 +6,7 @@ import { formatFileSize } from '@/lib/utils';
 import { t, type Lang } from '@/lib/i18n';
 import { imagesToPdf } from '@/lib/pdf/images-to-pdf';
 import UploadBox from '@/components/tools/UploadBox';
+import FileListRow from '@/components/FileListRow';
 
 type Item = {
   id: string;
@@ -115,18 +116,16 @@ export default function ImagesToPdfDesk({
       </header>
 
       <div className="main-width">
-        <div className="glass-effect p-4">
-          <UploadBox
-            lang={lang}
-            preview=""
-            busy={running}
-            multiple
-            onFiles={addFiles}
-          />
-          <p className="mt-3 text-sm text-(--muted-ink)">
-            {t(lang, 'pdfImagesNote')}
-          </p>
-        </div>
+        <UploadBox
+          lang={lang}
+          preview=""
+          busy={running}
+          multiple
+          onFiles={addFiles}
+        />
+        <p className="mt-3 text-sm text-(--muted-ink)">
+          {t(lang, 'pdfImagesNote')}
+        </p>
 
         {items.length ? (
           <div className="glass-effect mt-4 flex flex-wrap items-center justify-between gap-2 p-4">
@@ -197,51 +196,46 @@ export default function ImagesToPdfDesk({
         {items.length ? (
           <ul className="mt-4 space-y-2">
             {items.map((item, index) => (
-              <li
+              <FileListRow
                 key={item.id}
-                className="glass-effect flex flex-wrap items-center gap-3 p-3"
+                onRemove={() => removeItem(item.id)}
+                removeLabel={t(lang, 'remove')}
+                removeDisabled={running}
+                thumbnail={
+                  <img
+                    src={item.preview}
+                    alt=""
+                    className="h-14 w-14 shrink-0 border border-(--line) object-cover"
+                  />
+                }
+                actions={
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-line"
+                      disabled={running || index === 0}
+                      onClick={() => move(index, -1)}
+                      aria-label={t(lang, 'moveUp')}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-line"
+                      disabled={running || index === items.length - 1}
+                      onClick={() => move(index, 1)}
+                      aria-label={t(lang, 'moveDown')}
+                    >
+                      ↓
+                    </button>
+                  </>
+                }
               >
-                <img
-                  src={item.preview}
-                  alt=""
-                  className="h-14 w-14 shrink-0 border border-(--line) object-cover"
-                />
-                <div className="min-w-0 flex-1 basis-40">
-                  <p className="truncate text-sm">{item.file.name}</p>
-                  <p className="mt-1 text-sm text-(--muted-ink)">
-                    {formatFileSize(item.file.size)}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    className="btn btn-line"
-                    disabled={running || index === 0}
-                    onClick={() => move(index, -1)}
-                    aria-label={t(lang, 'moveUp')}
-                  >
-                    ↑
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-line"
-                    disabled={running || index === items.length - 1}
-                    onClick={() => move(index, 1)}
-                    aria-label={t(lang, 'moveDown')}
-                  >
-                    ↓
-                  </button>
-                  <button
-                    type="button"
-                    className="flex h-7 w-7 shrink-0 items-center justify-center border border-(--line)"
-                    disabled={running}
-                    onClick={() => removeItem(item.id)}
-                    aria-label={t(lang, 'remove')}
-                  >
-                    ×
-                  </button>
-                </div>
-              </li>
+                <p className="truncate text-sm">{item.file.name}</p>
+                <p className="mt-1 text-sm text-(--muted-ink)">
+                  {formatFileSize(item.file.size)}
+                </p>
+              </FileListRow>
             ))}
           </ul>
         ) : null}

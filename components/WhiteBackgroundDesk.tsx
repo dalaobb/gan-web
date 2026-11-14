@@ -132,18 +132,17 @@ export default function WhiteBackgroundDesk({
       </header>
 
       <div className="main-width">
-        <div className="glass-effect p-4">
-          <UploadBox
-            lang={lang}
-            preview={preview}
-            afterPreview={result?.url}
-            busy={busy}
-            onFile={handleFile}
-          />
-          {status || error ? (
-            <p className="mt-3 text-sm text-(--muted-ink)">{error || status}</p>
-          ) : null}
-        </div>
+        <UploadBox
+          lang={lang}
+          preview={preview}
+          afterPreview={result?.url}
+          busy={busy}
+          single
+          onFile={handleFile}
+        />
+        {status || error ? (
+          <p className="mt-3 text-sm text-(--muted-ink)">{error || status}</p>
+        ) : null}
 
         <div className="glass-effect mt-4 p-4">
           <label className="block text-sm">

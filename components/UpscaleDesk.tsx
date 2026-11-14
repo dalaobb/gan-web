@@ -23,6 +23,7 @@ import {
   type UpscaleScale,
 } from '@/lib/upscale/engine';
 import CompressCompareStage from '@/components/CompressCompareStage';
+import FileListRow from '@/components/FileListRow';
 
 type Item = {
   id: string;
@@ -131,62 +132,56 @@ function UpscaleRow({
   }
 
   return (
-    <li
-      className={`glass-effect flex flex-wrap items-center gap-3 p-3 ${
-        item.status === 'working' ? 'processing' : ''
-      }`}
+    <FileListRow
+      processing={item.status === 'working'}
+      onRemove={onClose}
+      removeLabel={t(lang, 'compressClose')}
+      removeDisabled={item.status === 'working'}
+      thumbnail={
+        <img
+          src={item.preview}
+          alt=""
+          className="h-14 w-14 shrink-0 border border-(--line) object-cover"
+        />
+      }
+      actions={
+        <>
+          <button type="button" className="btn btn-line" onClick={onPreview}>
+            {t(lang, 'preview')}
+          </button>
+          {result && item.resultName ? (
+            <>
+              <button type="button" className="btn btn-line" onClick={copyFile}>
+                {copied ? t(lang, 'copied') : t(lang, 'copy')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-solid"
+                onClick={() => FileSaver.saveAs(result, item.resultName!)}
+              >
+                {t(lang, 'save')}
+              </button>
+            </>
+          ) : null}
+        </>
+      }
     >
-      <img
-        src={item.preview}
-        alt=""
-        className="h-14 w-14 shrink-0 border border-(--line) object-cover"
-      />
-      <div className="min-w-0 flex-1 basis-40">
-        <p className="truncate text-sm">{name}</p>
-        <p
-          className={`mt-1 text-sm ${
-            item.status === 'error' ? 'text-[#9f2d2d]' : 'text-(--muted-ink)'
-          }`}
-        >
-          {item.status === 'working' ? t(lang, 'processing') : null}
-          {item.status === 'error' ? copy.failed : null}
-          {item.status === 'ready' ? formatFileSize(item.file.size) : null}
-          {item.status === 'done' && result
-            ? `${formatFileSize(item.file.size)} → ${formatFileSize(
-                result.size
-              )}${item.width ? ` · ${item.width}×${item.height}` : ''}`
-            : null}
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <button type="button" className="btn btn-line" onClick={onPreview}>
-          {t(lang, 'preview')}
-        </button>
-        {result && item.resultName ? (
-          <>
-            <button type="button" className="btn btn-line" onClick={copyFile}>
-              {copied ? t(lang, 'copied') : t(lang, 'copy')}
-            </button>
-            <button
-              type="button"
-              className="btn btn-solid"
-              onClick={() => FileSaver.saveAs(result, item.resultName!)}
-            >
-              {t(lang, 'save')}
-            </button>
-          </>
-        ) : null}
-      </div>
-      <button
-        type="button"
-        className="flex h-7 w-7 shrink-0 items-center justify-center border border-(--line)"
-        onClick={onClose}
-        disabled={item.status === 'working'}
-        aria-label={t(lang, 'compressClose')}
+      <p className="truncate text-sm">{name}</p>
+      <p
+        className={`mt-1 text-sm ${
+          item.status === 'error' ? 'text-[#9f2d2d]' : 'text-(--muted-ink)'
+        }`}
       >
-        ×
-      </button>
-    </li>
+        {item.status === 'working' ? t(lang, 'processing') : null}
+        {item.status === 'error' ? copy.failed : null}
+        {item.status === 'ready' ? formatFileSize(item.file.size) : null}
+        {item.status === 'done' && result
+          ? `${formatFileSize(item.file.size)} → ${formatFileSize(
+              result.size
+            )}${item.width ? ` · ${item.width}×${item.height}` : ''}`
+          : null}
+      </p>
+    </FileListRow>
   );
 }
 
@@ -624,7 +619,7 @@ export default function UpscaleDesk({
       </header>
 
       <div className="main-width">
-        <div className="relative m-auto h-64 text-sm sm:h-72 md:h-80">
+        <div className="relative m-auto min-h-72 w-full text-sm">
           <input
             id={inputId}
             type="file"
@@ -643,12 +638,10 @@ export default function UpscaleDesk({
             className="drop-zone absolute inset-0 flex cursor-pointer items-center justify-center border-2 border-dashed text-center"
           >
             <div className="bg-(--paper) px-8 py-6">
-              <p className="font-display text-4xl leading-none tracking-tight text-(--ink) sm:text-5xl">
+              <p className="upload-title">
                 {dragging ? t(lang, 'dropRelease') : t(lang, 'dropTitle')}
               </p>
-              <p className="mt-3 text-sm text-(--muted-ink)">
-                {t(lang, 'dropHint')}
-              </p>
+              <p className="upload-hint">{t(lang, 'dropHint')}</p>
             </div>
           </label>
         </div>

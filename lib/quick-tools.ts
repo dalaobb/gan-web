@@ -7,7 +7,8 @@ export type QuickToolKey =
   | 'remove-exif'
   | 'blur-face'
   | 'images-to-pdf'
-  | 'pdf-to-jpg';
+  | 'pdf-to-jpg'
+  | 'compress-gif';
 
 export type QuickToolCopy = {
   title: string;
@@ -460,6 +461,79 @@ export const quickToolPages: QuickToolPage[] = [
           {
             q: '为什么图片比 PDF 大？',
             a: '页面按 2 倍分辨率渲染成位图，输出体积可能比原 PDF 大。',
+          },
+        ],
+      },
+    },
+  },
+  {
+    slug: 'compress-gif',
+    key: 'compress-gif',
+    ogImage: '/bggone-compress.jpg',
+    copy: {
+      en: {
+        title: 'Compress GIF Online to a Target Size | BgGone',
+        description:
+          'Compress animated GIFs in your browser to a target size. Reduce dimensions, frames, or colors and download without uploading.',
+        h1: 'GIF Compressor',
+        lead: 'Shrink an animated GIF toward a target size, locally in your browser.',
+        intro:
+          'Choose a target size and this tool re-encodes the animation. It may reduce dimensions, drop frames, or use fewer colors to get under the limit, and the result stays on this device.',
+        bullets: [
+          'Targets from 100 KB to 5 MB',
+          'Keeps the animation',
+          'Adjusts size, frames, and colors',
+          'No upload and no login',
+        ],
+        faq: [
+          {
+            q: 'How does it hit the target size?',
+            a: 'It tries smaller dimensions, fewer frames, and smaller color palettes until the GIF fits or no smaller option helps.',
+          },
+          {
+            q: 'Does it keep the animation?',
+            a: 'Yes. The output is still an animated GIF, though some frames or dimensions may be reduced.',
+          },
+          {
+            q: 'Is my GIF uploaded?',
+            a: 'No. Parsing, re-encoding, and download all happen in this browser.',
+          },
+          {
+            q: 'Why is it still above the target?',
+            a: 'Some GIFs cannot get under a very small target without losing too much. The result will show if it is still above the limit.',
+          },
+        ],
+      },
+      zh: {
+        title: '在线压缩 GIF 到指定体积 | BgGone',
+        description:
+          '在浏览器里把动图 GIF 压到目标体积，可缩小尺寸、减少帧数或颜色数，无需上传。',
+        h1: 'GIF 压缩',
+        lead: '在本机把动图 GIF 压向目标体积。',
+        intro:
+          '选择目标体积后，这个工具会重新编码动图。为了压到限制以内，可能会缩小尺寸、减少帧数或颜色数，结果文件留在这台设备上。',
+        bullets: [
+          '目标体积 100KB 到 5MB',
+          '保留动画',
+          '自动调整尺寸、帧数和颜色',
+          '无需上传、无需登录',
+        ],
+        faq: [
+          {
+            q: '它怎么达到目标体积？',
+            a: '会依次尝试更小的尺寸、更少的帧数和更小的颜色表，直到 GIF 符合要求或没有更小的方案。',
+          },
+          {
+            q: '还会保留动画吗？',
+            a: '会。输出仍然是动图 GIF，但尺寸、帧数或颜色可能减少。',
+          },
+          {
+            q: 'GIF 会被上传吗？',
+            a: '不会。解析、重新编码和下载都在浏览器里完成。',
+          },
+          {
+            q: '为什么还是超过目标体积？',
+            a: '有些 GIF 在目标太小时无法兼顾体积和画质。结果会提示是否仍然超过限制。',
           },
         ],
       },

@@ -26,6 +26,8 @@ const quickToolRoutes = [
   '/zh/images-to-pdf',
   '/pdf-to-jpg',
   '/zh/pdf-to-jpg',
+  '/compress-gif',
+  '/zh/compress-gif',
 ];
 
 const passportRoutes = [

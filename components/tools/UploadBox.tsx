@@ -10,6 +10,7 @@ export default function UploadBox({
   afterPreview,
   beforeLabel,
   afterLabel,
+  accept,
   busy,
   multiple = false,
   onFile,
@@ -20,6 +21,7 @@ export default function UploadBox({
   afterPreview?: string;
   beforeLabel?: string;
   afterLabel?: string;
+  accept?: string;
   busy: boolean;
   multiple?: boolean;
   onFile?: (file: File) => void;
@@ -44,7 +46,10 @@ export default function UploadBox({
         id={inputId}
         type="file"
         multiple={multiple}
-        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/avif,.jpg,.jpeg,.png,.webp,.heic,.heif,.avif"
+        accept={
+          accept ??
+          'image/jpeg,image/png,image/webp,image/heic,image/heif,image/avif,.jpg,.jpeg,.png,.webp,.heic,.heif,.avif'
+        }
         className="h-0 opacity-0"
         disabled={busy}
         onChange={(event) => {

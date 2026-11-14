@@ -6,6 +6,7 @@ import StripExifDesk from '@/components/StripExifDesk';
 import BlurFaceDesk from '@/components/BlurFaceDesk';
 import ImagesToPdfDesk from '@/components/ImagesToPdfDesk';
 import PdfToImagesDesk from '@/components/PdfToImagesDesk';
+import GifCompressDesk from '@/components/GifCompressDesk';
 
 export default function QuickToolDesk({
   lang,
@@ -30,5 +31,7 @@ export default function QuickToolDesk({
       return <ImagesToPdfDesk {...props} />;
     case 'pdf-to-jpg':
       return <PdfToImagesDesk {...props} />;
+    case 'compress-gif':
+      return <GifCompressDesk {...props} />;
   }
 }

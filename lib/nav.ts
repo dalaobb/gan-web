@@ -36,5 +36,9 @@ export function navLinks(lang: Lang) {
       href: localizedPath(lang, '/pdf-to-jpg'),
       label: t(lang, 'pdfToImagesNav'),
     },
+    {
+      href: localizedPath(lang, '/compress-gif'),
+      label: t(lang, 'gifNav'),
+    },
   ];
 }

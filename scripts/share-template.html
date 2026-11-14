@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+      body {
+        background: #141210;
+        color: #f4f1ea;
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+      .shell {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding: 48px 64px 44px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand { display: flex; align-items: center; gap: 12px; }
+      .brand img { width: 36px; height: 36px; }
+      .brand span {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 30px;
+        letter-spacing: -0.02em;
+      }
+      .site {
+        font-size: 14px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #8f887d;
+      }
+      .main {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1.08fr 0.92fr;
+        gap: 44px;
+        align-items: center;
+      }
+      .eyebrow {
+        color: #d9001b;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 500;
+        font-size: 70px;
+        line-height: 1;
+        letter-spacing: -0.035em;
+        margin: 16px 0 20px;
+        max-width: 620px;
+      }
+      .desc {
+        font-size: 20px;
+        line-height: 1.45;
+        color: #c9c1b4;
+        max-width: 560px;
+        margin: 0;
+      }
+      .chips { display: flex; gap: 10px; margin-top: 26px; flex-wrap: wrap; }
+      .chip {
+        border: 1px solid #3a352d;
+        color: #c9c1b4;
+        padding: 9px 13px;
+        font-size: 13px;
+        letter-spacing: 0.02em;
+      }
+      .visual {
+        position: relative;
+        height: 430px;
+        border: 1px solid #2f2a24;
+        background:
+          radial-gradient(circle at 50% 42%, #2b251f 0, #191613 68%),
+          repeating-linear-gradient(135deg, transparent 0 10px, rgba(255,255,255,0.018) 10px 11px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .sheet {
+        position: absolute;
+        width: 292px;
+        height: 386px;
+        background: #b9b1a4;
+        transform: rotate(6deg) translate(18px, 8px);
+        opacity: 0.55;
+      }
+      .doc {
+        position: relative;
+        width: 300px;
+        height: 390px;
+        background: #f4f1ea;
+        color: #141210;
+        transform: rotate(-6deg);
+        box-shadow: 0 32px 70px rgba(0, 0, 0, 0.5);
+        padding: 30px 28px;
+        z-index: 2;
+      }
+      .badge {
+        display: inline-block;
+        background: #d9001b;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        padding: 6px 10px;
+      }
+      .thumbs { display: flex; gap: 8px; margin-top: 26px; }
+      .thumb { width: 70px; height: 54px; border: 1px solid #cfc8bb; }
+      .thumb.a { background: linear-gradient(135deg, #8ebad6, #3d6678); }
+      .thumb.b { background: linear-gradient(135deg, #d6c2a4, #8f6b4a); }
+      .thumb.c { background: linear-gradient(135deg, #a7c8a0, #4f7455); }
+      .line { height: 3px; background: #d9d2c6; margin-top: 18px; }
+      .line.short { width: 62%; }
+      .line.mid { width: 82%; }
+      .line.long { width: 100%; }
+      .pdf-footer {
+        position: absolute;
+        left: 28px;
+        right: 28px;
+        bottom: 26px;
+        display: flex;
+        justify-content: space-between;
+        color: #8f887d;
+        font-size: 12px;
+        letter-spacing: 0.06em;
+      }
+      .bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #8f887d;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+      }
+      .arrow { color: #d9001b; }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="top">
+        <div class="brand">
+          <img src="file:///D:/Projects/gan-web/public/logo.png" alt="" />
+          <span>BgGone</span>
+        </div>
+        <div class="site">bgg.one / image tools</div>
+      </div>
+
+      <div class="main">
+        <div>
+          <div class="eyebrow">{{EYEBROW}}</div>
+          <h1>{{TITLE}}</h1>
+          <p class="desc">{{DESCRIPTION}}</p>
+          <div class="chips">
+            <span class="chip">No upload</span>
+            <span class="chip">No login</span>
+            <span class="chip">Local only</span>
+          </div>
+        </div>
+
+        <div class="visual">
+          <div class="sheet"></div>
+          <div class="doc">
+            <span class="badge">{{BADGE}}</span>
+            <div class="thumbs">
+              <div class="thumb a"></div>
+              <div class="thumb b"></div>
+              <div class="thumb c"></div>
+            </div>
+            <div class="line long"></div>
+            <div class="line mid"></div>
+            <div class="line short"></div>
+            <div class="line long"></div>
+            <div class="line mid"></div>
+            <div class="line short"></div>
+            <div class="pdf-footer">
+              <span>LOCAL</span>
+              <span>NO UPLOAD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom">
+        <span>Browser image tools · local only</span>
+        <span class="arrow">{{PATH}} →</span>
+      </div>
+    </div>
+  </body>
+</html>

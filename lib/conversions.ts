@@ -634,7 +634,7 @@ export function conversionMetadata(
   const canonical = new URL(localizedPath(lang, path), SITE_URL).href;
   const enUrl = new URL(localizedPath('en', path), SITE_URL).href;
   const zhUrl = new URL(localizedPath('zh', path), SITE_URL).href;
-  const ogImage = '/bggone-compress.jpg';
+  const ogImage = '/bggone-convert.jpg';
   const ogImageAlt =
     lang === 'zh'
       ? `${copy.h1} - 在浏览器里转换`
@@ -750,7 +750,7 @@ export function convertMetadata(lang: Lang): Metadata {
   const canonical = new URL(localizedPath(lang, '/convert'), SITE_URL).href;
   const enUrl = new URL(localizedPath('en', '/convert'), SITE_URL).href;
   const zhUrl = new URL(localizedPath('zh', '/convert'), SITE_URL).href;
-  const ogImage = '/bggone-compress.jpg';
+  const ogImage = '/bggone-convert.jpg';
 
   return {
     title: copy.title,

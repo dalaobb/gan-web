@@ -64,6 +64,12 @@ Crop a portrait to a US, UK, India, Schengen, Canada, Australia, Japan, or China
 
 [Passport photo maker](/passport-photo)
 
+## More image tools
+
+Compress GIFs, convert images to PDF, remove metadata, blur faces, and more. Everything runs in the browser.
+
+[Browse all tools](/tools) · [GIF compressor](/compress-gif) · [Images to PDF](/images-to-pdf) · [PDF to images](/pdf-to-jpg)
+
 ## FAQ
 ### Do I need to log in or create an account?
 No. BgGone needs no login and no signup — just open the page and start removing backgrounds.

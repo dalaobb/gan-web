@@ -64,6 +64,12 @@
 
 [证件照制作](/zh/passport-photo)
 
+## 更多图片工具
+
+压缩 GIF、图片转 PDF、删除元数据、人脸模糊等，全部在浏览器里完成。
+
+[全部工具](/zh/tools) · [GIF 压缩](/zh/compress-gif) · [图片转 PDF](/zh/images-to-pdf) · [PDF 转图片](/zh/pdf-to-jpg)
+
 ## 常见问题
 ### 需要登录或注册吗？
 不需要。BgGone 无需登录、无需注册，打开页面即可开始抠图。

@@ -15,6 +15,24 @@ export default function QuickToolCopy({
 }) {
   const copy = tool.copy[lang];
   const others = quickToolPages.filter((item) => item.slug !== tool.slug);
+  const coreTools = [
+    {
+      href: '/',
+      label: lang === 'zh' ? '去除背景' : 'Background remover',
+    },
+    {
+      href: '/compress',
+      label: lang === 'zh' ? '图片压缩' : 'Image compressor',
+    },
+    {
+      href: '/convert',
+      label: lang === 'zh' ? '图片格式转换' : 'Image converter',
+    },
+    {
+      href: '/passport-photo',
+      label: lang === 'zh' ? '证件照制作' : 'Passport photo maker',
+    },
+  ];
 
   return (
     <div className="main-width mt-5 px-4 pt-4 pb-16 md:mt-8">
@@ -43,6 +61,11 @@ export default function QuickToolCopy({
               {lang === 'zh' ? '全部工具' : 'All tools'}
             </a>
           </li>
+          {coreTools.map((item) => (
+            <li key={item.href}>
+              <a href={localizedPath(lang, item.href)}>{item.label}</a>
+            </li>
+          ))}
           {others.map((item) => (
             <li key={item.slug}>
               <a href={localizedPath(lang, `/${item.slug}`)}>

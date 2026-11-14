@@ -56,6 +56,45 @@ export default function ConversionCopy({
             </li>
           ))}
         </ul>
+
+        <h2>{lang === 'zh' ? '更多图片工具' : 'More image tools'}</h2>
+        <ul>
+          <li>
+            <a href={localizedPath(lang, '/')}>
+              {lang === 'zh' ? '去除背景' : 'Background remover'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/compress')}>
+              {lang === 'zh' ? '图片压缩' : 'Image compressor'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/passport-photo')}>
+              {lang === 'zh' ? '证件照制作' : 'Passport photo maker'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/images-to-pdf')}>
+              {lang === 'zh' ? '图片转 PDF' : 'Images to PDF'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/pdf-to-jpg')}>
+              {lang === 'zh' ? 'PDF 转图片' : 'PDF to images'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/compress-gif')}>
+              {lang === 'zh' ? 'GIF 压缩' : 'GIF compressor'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/tools')}>
+              {lang === 'zh' ? '全部工具' : 'All tools'}
+            </a>
+          </li>
+        </ul>
       </div>
 
       <script

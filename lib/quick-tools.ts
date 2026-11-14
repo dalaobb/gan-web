@@ -31,7 +31,7 @@ export const quickToolPages: QuickToolPage[] = [
   {
     slug: 'blur-background',
     key: 'blur-background',
-    ogImage: '/bggone-bg-remover.jpg',
+    ogImage: '/bggone-blur-background.jpg',
     copy: {
       en: {
         title: 'Blur Image Background Online, No Upload | BgGone',
@@ -104,7 +104,7 @@ export const quickToolPages: QuickToolPage[] = [
   {
     slug: 'white-background',
     key: 'white-background',
-    ogImage: '/bggone-bg-remover.jpg',
+    ogImage: '/bggone-white-background.jpg',
     copy: {
       en: {
         title: 'White Background Product Photo, 2000×2000 | BgGone',
@@ -177,7 +177,7 @@ export const quickToolPages: QuickToolPage[] = [
   {
     slug: 'remove-exif',
     key: 'remove-exif',
-    ogImage: '/bggone-compress.jpg',
+    ogImage: '/bggone-remove-exif.jpg',
     copy: {
       en: {
         title: 'Remove EXIF Metadata from Photos | BgGone',
@@ -250,7 +250,7 @@ export const quickToolPages: QuickToolPage[] = [
   {
     slug: 'blur-face',
     key: 'blur-face',
-    ogImage: '/bggone-bg-remover.jpg',
+    ogImage: '/bggone-blur-face.jpg',
     copy: {
       en: {
         title: 'Blur Faces in Photos, Local and No Upload | BgGone',
@@ -323,7 +323,7 @@ export const quickToolPages: QuickToolPage[] = [
   {
     slug: 'images-to-pdf',
     key: 'images-to-pdf',
-    ogImage: '/bggone-compress.jpg',
+    ogImage: '/bggone-images-to-pdf.jpg',
     copy: {
       en: {
         title: 'Images to PDF Converter, No Upload | BgGone',
@@ -396,7 +396,7 @@ export const quickToolPages: QuickToolPage[] = [
   {
     slug: 'pdf-to-jpg',
     key: 'pdf-to-jpg',
-    ogImage: '/bggone-compress.jpg',
+    ogImage: '/bggone-pdf-to-jpg.jpg',
     copy: {
       en: {
         title: 'PDF to JPG Converter, No Upload | BgGone',
@@ -469,7 +469,7 @@ export const quickToolPages: QuickToolPage[] = [
   {
     slug: 'compress-gif',
     key: 'compress-gif',
-    ogImage: '/bggone-compress.jpg',
+    ogImage: '/bggone-compress-gif.jpg',
     copy: {
       en: {
         title: 'Compress GIF Online to a Target Size | BgGone',

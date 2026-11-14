@@ -64,6 +64,40 @@ export default function PassportCopy({
           ))}
         </ul>
 
+        <h2>{lang === 'zh' ? '更多图片工具' : 'More image tools'}</h2>
+        <ul>
+          <li>
+            <a href={localizedPath(lang, '/')}>
+              {lang === 'zh' ? '去除背景' : 'Background remover'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/compress')}>
+              {lang === 'zh' ? '图片压缩' : 'Image compressor'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/convert')}>
+              {lang === 'zh' ? '图片格式转换' : 'Image converter'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/images-to-pdf')}>
+              {lang === 'zh' ? '图片转 PDF' : 'Images to PDF'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/compress-gif')}>
+              {lang === 'zh' ? 'GIF 压缩' : 'GIF compressor'}
+            </a>
+          </li>
+          <li>
+            <a href={localizedPath(lang, '/tools')}>
+              {lang === 'zh' ? '全部工具' : 'All tools'}
+            </a>
+          </li>
+        </ul>
+
         <p>
           {lang === 'zh'
             ? '打印前请核对官方要求。这个工具只提供裁切和背景处理，不保证证件机关一定接受。'

@@ -1,9 +1,9 @@
 // libheif-js's Node entry reads the wasm with fs. These two files are copied
 // from libheif-js/libheif-wasm and loaded only when a HEIC file shows up.
-// Upgrading libheif-js means copying libheif.js and libheif.wasm again.
+// Upgrading libheif-js means uploading libheif.js and libheif.wasm again.
 
-const GLUE = '/compress/libheif.js';
-const WASM = '/compress/libheif.wasm';
+const GLUE = 'https://cdn.bgg.one/compress/1.0.0/libheif.js';
+const WASM = 'https://cdn.bgg.one/compress/1.0.0/libheif.wasm';
 
 const HEIC_BRANDS = new Set(['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis']);
 

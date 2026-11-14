@@ -1,7 +1,7 @@
 import { cachedHeic, looksLikeHeic } from '@/lib/compress/heic';
 import type { OutputFormat, QualityId } from '@/lib/compress/protocol';
 
-const WASM = '/compress';
+const WASM = 'https://cdn.bgg.one/compress/1.0.0';
 
 const QUALITY: Record<QualityId, number> = {
   smaller: 60,

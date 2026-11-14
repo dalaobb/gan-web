@@ -8,6 +8,7 @@ import { renderFaceBlur } from '@/lib/image/effects';
 import UploadBox from '@/components/tools/UploadBox';
 import OutputRow from '@/components/OutputRow';
 import CompressCompareStage from '@/components/CompressCompareStage';
+import ManualFaceBoxEditor from '@/components/ManualFaceBoxEditor';
 
 type Result = {
   blob: Blob;
@@ -41,6 +42,7 @@ export default function BlurFaceDesk({
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
   const previewRef = useRef('');
   const resultRef = useRef('');
 
@@ -134,6 +136,7 @@ export default function BlurFaceDesk({
     setBoxes([]);
     setResult(null);
     setFile(null);
+    setManualOpen(false);
     if (previewRef.current) revoke(previewRef.current);
     if (resultRef.current) revoke(resultRef.current);
     previewRef.current = '';
@@ -230,6 +233,15 @@ export default function BlurFaceDesk({
             {t(lang, 'detectionSensitivityNote')}
           </p>
 
+          <button
+            type="button"
+            className="btn btn-line mt-3 w-full"
+            disabled={!file || busy || detecting}
+            onClick={() => setManualOpen(true)}
+          >
+            {t(lang, 'manualBoxes')}
+          </button>
+
           <p className="mt-3 text-sm text-(--muted-ink)">
             {t(lang, 'blurFaceNote')}
           </p>
@@ -250,6 +262,23 @@ export default function BlurFaceDesk({
             />
           </ul>
         </div>
+      ) : null}
+
+      {manualOpen && file && preview ? (
+        <ManualFaceBoxEditor
+          lang={lang}
+          url={preview}
+          initialBoxes={boxes}
+          onApply={(next) => {
+            setBoxes(next);
+            setManualOpen(false);
+            setError('');
+            setStatus(
+              t(lang, 'manualBoxesCount', { count: String(next.length) })
+            );
+          }}
+          onClose={() => setManualOpen(false)}
+        />
       ) : null}
 
       {previewOpen && items.length ? (

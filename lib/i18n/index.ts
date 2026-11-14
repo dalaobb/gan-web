@@ -148,6 +148,14 @@ export const translations = {
     detectionSensitivityNote:
       'Lower values can find faces in soft or blurry photos, but may add false positives.',
     blurFaceOutput: 'Faces blurred',
+    manualBoxes: 'Manual boxes',
+    manualBoxesTitle: 'Draw boxes over faces',
+    manualBoxesHint:
+      'Drag to draw a box around each face. Use this when automatic detection misses a face.',
+    manualBoxesCount: '{count} boxes',
+    manualBoxesClear: 'Clear boxes',
+    manualBoxesApply: 'Apply boxes',
+    manualBoxesCancel: 'Cancel',
     blurFaceNote:
       'Each detected face is blurred. The download is a new copy; your original stays untouched.',
     createPdf: 'Create PDF',
@@ -355,6 +363,13 @@ export const translations = {
     detectionSensitivityNote:
       '降低数值可以识别更模糊的人脸，但可能增加误判。',
     blurFaceOutput: '人脸模糊后',
+    manualBoxes: '手动框选',
+    manualBoxesTitle: '在脸上画框',
+    manualBoxesHint: '拖动为每张脸画框。自动检测漏掉时可以用。',
+    manualBoxesCount: '{count} 个框',
+    manualBoxesClear: '清空框选',
+    manualBoxesApply: '应用框选',
+    manualBoxesCancel: '取消',
     blurFaceNote: '识别到的人脸会被模糊，结果另存为新文件。',
     createPdf: '生成 PDF',
     convertPdf: '转换 PDF',

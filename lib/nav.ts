@@ -40,5 +40,9 @@ export function navLinks(lang: Lang) {
       href: localizedPath(lang, '/compress-gif'),
       label: t(lang, 'gifNav'),
     },
+    {
+      href: localizedPath(lang, '/upscale'),
+      label: t(lang, 'upscaleNav'),
+    },
   ];
 }

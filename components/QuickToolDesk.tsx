@@ -7,6 +7,7 @@ import BlurFaceDesk from '@/components/BlurFaceDesk';
 import ImagesToPdfDesk from '@/components/ImagesToPdfDesk';
 import PdfToImagesDesk from '@/components/PdfToImagesDesk';
 import GifCompressDesk from '@/components/GifCompressDesk';
+import UpscaleDesk from '@/components/UpscaleDesk';
 
 export default function QuickToolDesk({
   lang,
@@ -33,5 +34,7 @@ export default function QuickToolDesk({
       return <PdfToImagesDesk {...props} />;
     case 'compress-gif':
       return <GifCompressDesk {...props} />;
+    case 'upscale':
+      return <UpscaleDesk {...props} />;
   }
 }

@@ -8,7 +8,8 @@ export type QuickToolKey =
   | 'blur-face'
   | 'images-to-pdf'
   | 'pdf-to-jpg'
-  | 'compress-gif';
+  | 'compress-gif'
+  | 'upscale';
 
 export type QuickToolCopy = {
   title: string;
@@ -534,6 +535,97 @@ export const quickToolPages: QuickToolPage[] = [
           {
             q: '为什么还是超过目标体积？',
             a: '有些 GIF 在目标太小时无法兼顾体积和画质。结果会提示是否仍然超过限制。',
+          },
+        ],
+      },
+    },
+  },
+  {
+    slug: 'upscale',
+    key: 'upscale',
+    ogImage: '/bggone-upscale.jpg',
+    copy: {
+      en: {
+        title: '2× / 4× Image Upscaler with Real-ESRGAN, Local | BgGone',
+        description:
+          'Upscale a photo 2× or 4× in your browser with Real-ESRGAN. The image stays on your device; the first run downloads the model once.',
+        h1: '2× / 4× Image Upscaler',
+        lead: "Double or quadruple a photo's resolution locally with Real-ESRGAN.",
+        intro:
+          'This beta tool runs Real-ESRGAN in the browser. Add one or several photos, choose 2× or 4×, start the batch, and preview each result before downloading. 2× accepts inputs up to 1400 px on the long edge; 4× runs the model twice and accepts up to 700 px. The first run downloads about 67 MB; later runs reuse the cached model. Transparent areas are flattened to white.',
+        bullets: [
+          '2× and 4× modes',
+          'Batch upscale with previews',
+          'Runs locally in the browser',
+          'WebGPU with CPU fallback',
+          'No upload and no login',
+        ],
+        faq: [
+          {
+            q: 'Is the output really 2× or 4×?',
+            a: 'Yes. 2× doubles the width and height of the processed image. 4× runs the 2× model twice, producing four times the width and height.',
+          },
+          {
+            q: 'Why is 4× limited to 700 px?',
+            a: 'A 4× result has 16 times as many pixels as the input. The cap keeps the output at or below 2800 px and avoids browser memory errors.',
+          },
+          {
+            q: 'Can I upscale more than one photo?',
+            a: 'Yes. Add a batch, start it once, then preview each row. Use the close button on a row to remove it before downloading.',
+          },
+          {
+            q: 'Why is there a size limit?',
+            a: 'The model is heavy. Keeping the input at 1400 px or less avoids browser memory errors and very long runtimes.',
+          },
+          {
+            q: 'What happens without WebGPU?',
+            a: 'It falls back to CPU with WebAssembly. That still works, but it can take much longer.',
+          },
+          {
+            q: 'Are my photos uploaded?',
+            a: 'No. Downloading the model is the only network request; the image itself is processed in this browser.',
+          },
+        ],
+      },
+      zh: {
+        title: '2× / 4× 图片高清放大，本地 Real-ESRGAN | BgGone',
+        description:
+          '在浏览器里用 Real-ESRGAN 把照片放大 2 倍或 4 倍，图片不离开本机，首次使用下载一次模型。',
+        h1: '2× / 4× 图片高清放大',
+        lead: '在本机用 Real-ESRGAN 把照片分辨率放大 2 倍或 4 倍。',
+        intro:
+          '这是一个测试版工具，模型在浏览器里运行。可以一次加入多张照片，选择 2× 或 4×，开始批量放大，逐张预览后再下载。2× 输入长边最大 1400px；4× 会把 2× 模型跑两遍，输入长边最大 700px。首次使用会下载约 67MB 模型，之后复用缓存；透明区域会铺白。',
+        bullets: [
+          '2× 和 4× 两种模式',
+          '批量放大，可逐张预览',
+          '浏览器本地运行',
+          '优先 WebGPU，支持 CPU 回退',
+          '无需上传、无需登录',
+        ],
+        faq: [
+          {
+            q: '输出真的是 2 倍或 4 倍吗？',
+            a: '是。2× 会把处理后图片的宽高翻倍；4× 会把 2× 模型跑两遍，宽高变成 4 倍。',
+          },
+          {
+            q: '为什么 4× 限制 700px？',
+            a: '4× 结果的像素数是输入的 16 倍。限制输入可以避免输出超过 2800px，减少浏览器内存不足的风险。',
+          },
+          {
+            q: '可以一次放大多张照片吗？',
+            a: '可以。加入一批照片后点一次开始，等结果出来后逐张预览。下载前可以用列表里的关闭按钮删除不满意的图片。',
+          },
+          {
+            q: '为什么限制输入尺寸？',
+            a: '模型比较重。把输入长边控制在 1400px 以内，可以避免浏览器内存不足和过长的等待。',
+          },
+          {
+            q: '没有 WebGPU 会怎样？',
+            a: '会退回 WebAssembly + CPU。仍然能用，但速度会慢很多。',
+          },
+          {
+            q: '照片会被上传吗？',
+            a: '不会。唯一的网络请求是下载模型，图片本身只在浏览器里处理。',
           },
         ],
       },

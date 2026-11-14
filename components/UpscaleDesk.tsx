@@ -10,7 +10,9 @@ import {
 } from 'react';
 import JSZip from 'jszip';
 import FileSaver from 'file-saver';
+import * as Sentry from '@sentry/nextjs';
 import { formatFileSize, formatTime } from '@/lib/utils';
+import { track } from '@/lib/analytics';
 import { t, type Lang } from '@/lib/i18n';
 import {
   upscaleImage,
@@ -201,6 +203,9 @@ export default function UpscaleDesk({
   const itemsRef = useRef<Item[]>([]);
   const runningRef = useRef(false);
   const runRef = useRef(0);
+  const stageRef = useRef('init');
+  const backendRef = useRef<UpscaleBackend | undefined>(undefined);
+  const viewedRef = useRef(false);
   const [items, setItems] = useState<Item[]>([]);
   const [scale, setScale] = useState<UpscaleScale>(2);
   const [dragging, setDragging] = useState(false);
@@ -221,29 +226,48 @@ export default function UpscaleDesk({
     };
   }, []);
 
-  const addFiles = useCallback((files?: FileList | File[] | null) => {
-    if (runningRef.current || !files?.length) return;
-    const picked = Array.from(files).filter((file) =>
-      file.type.startsWith('image/')
-    );
-    if (!picked.length) return;
-
-    const next = picked.map((file) => ({
-      id: crypto.randomUUID(),
-      file,
-      preview: URL.createObjectURL(file),
-      status: 'ready' as const,
-    }));
-
-    setItems((current) => {
-      for (const item of current) revokePreview(item.preview);
-      return next;
-    });
-    setPreviewId(undefined);
-    setDetail('');
-    setRatio(0);
-    setMessage('');
+  useEffect(() => {
+    if (viewedRef.current) return;
+    viewedRef.current = true;
+    track('upscale_view', { tool: 'upscale' });
   }, []);
+
+  const addFiles = useCallback(
+    (
+      files?: FileList | File[] | null,
+      source: 'picker' | 'drop' | 'paste' = 'picker'
+    ) => {
+      if (runningRef.current || !files?.length) return;
+      const picked = Array.from(files).filter((file) =>
+        file.type.startsWith('image/')
+      );
+      if (!picked.length) return;
+
+      const next = picked.map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        preview: URL.createObjectURL(file),
+        status: 'ready' as const,
+      }));
+
+      setItems((current) => {
+        for (const item of current) revokePreview(item.preview);
+        return next;
+      });
+      track('upscale_files_added', {
+        tool: 'upscale',
+        count: next.length,
+        total_bytes: next.reduce((sum, item) => sum + item.file.size, 0),
+        source,
+        mime: next[0]?.file.type,
+      });
+      setPreviewId(undefined);
+      setDetail('');
+      setRatio(0);
+      setMessage('');
+    },
+    []
+  );
 
   function replaceItems(next: Item[]) {
     setItems((current) => {
@@ -274,6 +298,7 @@ export default function UpscaleDesk({
 
   function changeScale(next: UpscaleScale) {
     if (running || next === scale) return;
+    track('upscale_scale_selected', { tool: 'upscale', scale: next });
     setScale(next);
     setItems((current) =>
       current.map((item) => ({
@@ -313,7 +338,7 @@ export default function UpscaleDesk({
       event.preventDefault();
       drop?.classList.remove('drag-over');
       setDragging(false);
-      addFiles(event.dataTransfer?.files);
+      addFiles(event.dataTransfer?.files, 'drop');
     }
 
     drop.addEventListener('dragover', dragOver);
@@ -335,7 +360,7 @@ export default function UpscaleDesk({
         const file = list[index].getAsFile();
         if (file?.type.startsWith('image/')) pasted.push(file);
       }
-      if (pasted.length) addFiles(pasted);
+      if (pasted.length) addFiles(pasted, 'paste');
     }
 
     document.documentElement.addEventListener('paste', pasteFiles);
@@ -345,6 +370,9 @@ export default function UpscaleDesk({
 
   const report = useCallback(
     (progress: UpscaleProgress, index: number, total: number) => {
+      stageRef.current = progress.stage;
+      if (progress.backend) backendRef.current = progress.backend;
+
       if (progress.stage === 'model') {
         if (progress.total) {
           const percent = Math.min(
@@ -398,8 +426,16 @@ export default function UpscaleDesk({
     const runId = ++runRef.current;
     const queue = items;
     const startedAt = performance.now();
+    const totalBytes = queue.reduce((sum, item) => sum + item.file.size, 0);
     let failed = 0;
+    let succeeded = 0;
 
+    track('upscale_start', {
+      tool: 'upscale',
+      scale,
+      count: queue.length,
+      total_bytes: totalBytes,
+    });
     setRunning(true);
     setMessage('');
     setDetail(copy.loading);
@@ -413,6 +449,8 @@ export default function UpscaleDesk({
         continue;
       }
 
+      stageRef.current = 'start';
+      backendRef.current = undefined;
       setItems((current) =>
         current.map((entry) =>
           entry.id === item.id
@@ -448,10 +486,36 @@ export default function UpscaleDesk({
               : entry
           )
         );
+        succeeded += 1;
+        track('upscale_success', {
+          tool: 'upscale',
+          scale: output.scale,
+          backend: output.backend,
+          duration_ms: Math.round(output.elapsedMs),
+          width: output.width,
+          height: output.height,
+          input_bytes: item.file.size,
+          output_bytes: output.blob.size,
+          batch_count: queue.length,
+        });
       } catch (reason) {
         console.error('Failed to upscale', item.file.name, reason);
         if (runRef.current !== runId) return;
         failed += 1;
+        const stage = stageRef.current;
+        track('upscale_error', {
+          tool: 'upscale',
+          scale,
+          stage,
+          backend: backendRef.current,
+          input_bytes: item.file.size,
+          batch_count: queue.length,
+          error: String(reason).slice(0, 160),
+        });
+        Sentry.captureException(reason, {
+          tags: { tool: 'upscale', stage, scale: String(scale) },
+          extra: { inputBytes: item.file.size, batchCount: queue.length },
+        });
         setItems((current) =>
           current.map((entry) =>
             entry.id === item.id ? { ...entry, status: 'error' } : entry
@@ -463,6 +527,14 @@ export default function UpscaleDesk({
     }
 
     if (runRef.current !== runId) return;
+    track('upscale_batch_complete', {
+      tool: 'upscale',
+      scale,
+      count: queue.length,
+      success_count: succeeded,
+      fail_count: failed,
+      duration_ms: Math.round(performance.now() - startedAt),
+    });
     setRunning(false);
     setDetail('');
     setRatio(1);
@@ -485,6 +557,12 @@ export default function UpscaleDesk({
   function downloadEach() {
     if (!doneItems.length || zipping) return;
     const used = new Set<string>();
+    track('upscale_download', {
+      tool: 'upscale',
+      kind: 'single',
+      count: doneItems.length,
+      total_bytes: doneItems.reduce((sum, item) => sum + item.result.size, 0),
+    });
     for (const item of doneItems) {
       FileSaver.saveAs(item.result, uniqueName(item.resultName, used));
     }
@@ -499,10 +577,14 @@ export default function UpscaleDesk({
       for (const item of doneItems) {
         zip.file(uniqueName(item.resultName, used), item.result);
       }
-      FileSaver.saveAs(
-        await zip.generateAsync({ type: 'blob' }),
-        'BgGone-upscaled.zip'
-      );
+      const content = await zip.generateAsync({ type: 'blob' });
+      track('upscale_download', {
+        tool: 'upscale',
+        kind: 'zip',
+        count: doneItems.length,
+        total_bytes: content.size,
+      });
+      FileSaver.saveAs(content, 'BgGone-upscaled.zip');
     } catch (reason) {
       console.error(reason);
       setMessage(t(lang, 'failedPackage'));
@@ -547,7 +629,7 @@ export default function UpscaleDesk({
             className="h-0 opacity-0"
             disabled={running}
             onChange={(event) => {
-              addFiles(event.target.files);
+              addFiles(event.target.files, 'picker');
               event.target.value = '';
             }}
           />
@@ -654,7 +736,13 @@ export default function UpscaleDesk({
               key={item.id}
               item={item}
               lang={lang}
-              onPreview={() => setPreviewId(item.id)}
+              onPreview={() => {
+                track('upscale_preview', {
+                  tool: 'upscale',
+                  has_result: !!item.result,
+                });
+                setPreviewId(item.id);
+              }}
               onClose={() => removeItem(item.id)}
             />
           ))}

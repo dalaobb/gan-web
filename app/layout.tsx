@@ -5,6 +5,7 @@ import Script from 'next/script';
 
 import ErrorHandlerProvider from '@/components/layouts/ErrorHandlerProvider';
 import DebugMobile from '@/components/DebugMobile';
+import WebVitals from '@/components/WebVitals';
 import { Toaster } from '@/components/ui/sonner';
 import { localeBootScript } from '@/lib/locale-boot';
 import { organizationJsonLd } from '@/lib/seo';
@@ -85,6 +86,7 @@ export default function RootLayout({
           }}
         />
         <GoogleAnalytics gaId="G-CZS9K7V64W" />
+        <WebVitals />
         <DebugMobile />
         <Toaster richColors />
       </body>

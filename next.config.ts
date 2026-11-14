@@ -7,6 +7,7 @@
 // export default nextConfig;
 
 import createMDX from '@next/mdx';
+import { withSentryConfig } from '@sentry/nextjs/config';
 
 const isolatedHeaders = [
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
@@ -107,4 +108,17 @@ const withMDX = createMDX({
 });
 
 // Merge MDX config with Next.js config
-export default withMDX(nextConfig);
+const mdxConfig = withMDX(nextConfig);
+
+export default process.env.SENTRY_AUTH_TOKEN
+  ? withSentryConfig(mdxConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      widenClientFileUpload: true,
+      tunnelRoute: '/monitoring',
+      sourcemaps: {
+        deleteSourcemapsAfterUpload: true,
+      },
+    })
+  : mdxConfig;

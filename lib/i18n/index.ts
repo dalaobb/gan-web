@@ -329,7 +329,7 @@ export const translations = {
     imagesToPdfNav: '图片转 PDF',
     pdfToImagesNav: 'PDF 转图片',
     gifNav: 'GIF 压缩',
-    upscaleNav: '2× / 4× 放大',
+    upscaleNav: '图片高清',
     menuLabel: '菜单',
     menuClose: '关闭菜单',
     toolsTitle: '浏览器图片工具',

@@ -13,6 +13,17 @@ const isolatedHeaders = [
   { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
 ];
 
+const quickToolRoutes = [
+  '/blur-background',
+  '/zh/blur-background',
+  '/white-background',
+  '/zh/white-background',
+  '/remove-exif',
+  '/zh/remove-exif',
+  '/blur-face',
+  '/zh/blur-face',
+];
+
 const passportRoutes = [
   '/passport-photo',
   '/zh/passport-photo',
@@ -55,6 +66,10 @@ const nextConfig = {
         headers: isolatedHeaders,
       })),
       ...passportRoutes.map((source) => ({
+        source,
+        headers: isolatedHeaders,
+      })),
+      ...quickToolRoutes.map((source) => ({
         source,
         headers: isolatedHeaders,
       })),

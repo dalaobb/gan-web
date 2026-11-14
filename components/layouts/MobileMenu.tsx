@@ -2,7 +2,8 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
-import { localizedPath, t, type Lang } from '@/lib/i18n';
+import { t, type Lang } from '@/lib/i18n';
+import { navLinks } from '@/lib/nav';
 
 export default function MobileMenu({ lang }: { lang: Lang }) {
   const [open, setOpen] = useState(false);
@@ -33,21 +34,10 @@ export default function MobileMenu({ lang }: { lang: Lang }) {
     };
   }, [open]);
 
-  const links = [
-    { href: localizedPath(lang, '/tools'), label: t(lang, 'toolsNav') },
-    { href: localizedPath(lang, '/convert'), label: t(lang, 'convertNav') },
-    {
-      href: localizedPath(lang, '/passport-photo'),
-      label: t(lang, 'passportNav'),
-    },
-    {
-      href: localizedPath(lang, '/compress'),
-      label: t(lang, 'compressNav'),
-    },
-  ];
+  const links = navLinks(lang);
 
   return (
-    <div ref={menuRef} className="relative md:hidden">
+    <div ref={menuRef} className="relative xl:hidden">
       <button
         type="button"
         aria-expanded={open}

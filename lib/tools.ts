@@ -1,6 +1,7 @@
 import { conversions } from '@/lib/conversions';
 import type { Lang } from '@/lib/i18n';
 import { passportPages } from '@/lib/passport/pages';
+import { quickToolPages } from '@/lib/quick-tools';
 
 export type ToolLink = {
   path: string;
@@ -41,6 +42,17 @@ export const publicTools: ToolLink[] = [
       zh: '在本机裁切护照、签证照片并导出排版。',
     },
   },
+  ...quickToolPages.map((tool) => ({
+    path: `/${tool.slug}`,
+    name: {
+      en: tool.copy.en.h1,
+      zh: tool.copy.zh.h1,
+    },
+    description: {
+      en: tool.copy.en.lead,
+      zh: tool.copy.zh.lead,
+    },
+  })),
 ];
 
 export const conversionPaths = conversions.map(
@@ -48,6 +60,7 @@ export const conversionPaths = conversions.map(
 );
 
 export const passportPaths = passportPages.map((page) => `/${page.slug}`);
+export const quickToolPaths = quickToolPages.map((tool) => `/${tool.slug}`);
 
 export const publicPaths = [
   '/',
@@ -59,4 +72,5 @@ export const publicPaths = [
   '/passport-photo',
   ...conversionPaths,
   ...passportPaths,
+  ...quickToolPaths,
 ];

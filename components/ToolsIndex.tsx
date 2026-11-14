@@ -1,4 +1,4 @@
-import { localizedPath, t, type Lang } from '@/lib/i18n';
+﻿import { localizedPath, t, type Lang } from '@/lib/i18n';
 import { conversions } from '@/lib/conversions';
 import { passportPages } from '@/lib/passport/pages';
 import { publicTools } from '@/lib/tools';
@@ -15,8 +15,8 @@ export default function ToolsIndex({ lang }: { lang: Lang }) {
         </p>
       </header>
 
-      <div className="main-width">
-        <ul className="grid gap-3 sm:grid-cols-2">
+      <div className="main-width-wide">
+        <ul className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {publicTools.map((tool) => (
             <li key={tool.path} className="glass-effect p-4">
               <a
@@ -35,7 +35,7 @@ export default function ToolsIndex({ lang }: { lang: Lang }) {
         <h2 className="mt-10 font-display text-2xl">
           {lang === 'zh' ? '格式转换' : 'Format converters'}
         </h2>
-        <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+        <ul className="mt-3 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
           {conversions.map((conversion) => (
             <li key={conversion.slug}>
               <a
@@ -51,7 +51,7 @@ export default function ToolsIndex({ lang }: { lang: Lang }) {
         <h2 className="mt-10 font-display text-2xl">
           {lang === 'zh' ? '证件照' : 'Passport photos'}
         </h2>
-        <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+        <ul className="mt-3 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
           {passportPages.map((page) => (
             <li key={page.slug}>
               <a

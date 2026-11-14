@@ -1,5 +1,18 @@
 export type Lang = 'en' | 'zh';
 
+export const languages: Record<
+  Lang,
+  { label: string; short: string; htmlLang: string }
+> = {
+  en: { label: 'English', short: 'EN', htmlLang: 'en' },
+  zh: { label: '中文', short: '中文', htmlLang: 'zh-CN' },
+};
+
+export const languageList = (Object.keys(languages) as Lang[]).map((code) => ({
+  code,
+  ...languages[code],
+}));
+
 export const LANG_STORAGE_KEY = 'bgg-lang';
 
 export const SITE_URL = 'https://bgg.one';

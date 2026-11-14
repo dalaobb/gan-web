@@ -358,7 +358,7 @@ export default function PassportDesk({
       </header>
 
       <div className="main-width-wide grid gap-4 lg:grid-cols-[minmax(0,1fr)_24rem] xl:grid-cols-[minmax(0,1fr)_26rem]">
-        <div className="glass-effect p-4">
+        <div className="glass-effect p-4 pt-0">
             <input
               ref={fileInputRef}
               type="file"

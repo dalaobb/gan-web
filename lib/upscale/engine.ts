@@ -33,10 +33,45 @@ type Runtime = {
 
 const CDN = 'https://cdn.bgg.one/upscale/1.0.0';
 const MODEL_URL = `${CDN}/realesrgan-x2.onnx`;
-const MAX_OUTPUT_EDGE = 2800;
+const DESKTOP_OUTPUT_EDGE = 2800;
 const TILE = 256;
 const OVERLAP = 16;
 const JPEG_QUALITY = 0.92;
+
+export type UpscaleLimits = {
+  maxOutputEdge: number;
+  max2x: number;
+  max4x: number;
+  mobile: boolean;
+  ios: boolean;
+};
+
+export function getUpscaleLimits(): UpscaleLimits {
+  if (typeof navigator === 'undefined') {
+    return {
+      maxOutputEdge: DESKTOP_OUTPUT_EDGE,
+      max2x: DESKTOP_OUTPUT_EDGE / 2,
+      max4x: DESKTOP_OUTPUT_EDGE / 4,
+      mobile: false,
+      ios: false,
+    };
+  }
+
+  const ua = navigator.userAgent;
+  const ios =
+    /iPad|iPhone|iPod/i.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const mobile = ios || /Android|Mobile|Windows Phone/i.test(ua);
+  const maxOutputEdge = ios ? 1600 : mobile ? 2000 : DESKTOP_OUTPUT_EDGE;
+
+  return {
+    maxOutputEdge,
+    max2x: Math.floor(maxOutputEdge / 2),
+    max4x: Math.floor(maxOutputEdge / 4),
+    mobile,
+    ios,
+  };
+}
 
 let modelPromise: Promise<ArrayBuffer> | null = null;
 let runtimePromise: Promise<Runtime> | null = null;
@@ -81,10 +116,10 @@ async function fetchModel(
   return output.buffer;
 }
 
-function configureOrt(ort: any) {
+function configureOrt(ort: any, backend: UpscaleBackend) {
   ort.env.wasm.numThreads = 1;
   ort.env.wasm.simd = true;
-  ort.env.wasm.proxy = false;
+  ort.env.wasm.proxy = backend === 'wasm';
   ort.env.wasm.wasmPaths = `${CDN}/`;
   ort.env.logLevel = 'error';
 }
@@ -94,7 +129,7 @@ async function createSession(
   model: ArrayBuffer,
   backend: UpscaleBackend
 ) {
-  configureOrt(ort);
+  configureOrt(ort, backend);
   return ort.InferenceSession.create(model, {
     executionProviders: [backend],
     graphOptimizationLevel: 'all',
@@ -113,8 +148,9 @@ async function getRuntime(
 
     const canUseWebGpu =
       typeof navigator !== 'undefined' &&
-      'gpu' in navigator &&
-      !!(await navigator.gpu.requestAdapter().catch(() => null));
+      !!(await (navigator as unknown as { gpu?: GPU })
+        .gpu?.requestAdapter()
+        .catch(() => null));
 
     if (canUseWebGpu) {
       try {
@@ -331,7 +367,7 @@ export async function upscaleImage(
   const runtime = await getRuntime(onProgress);
   if (signal?.aborted) throw abortError();
 
-  const maxInputEdge = Math.floor(MAX_OUTPUT_EDGE / scale);
+  const maxInputEdge = Math.floor(getUpscaleLimits().maxOutputEdge / scale);
   const { canvas, width, height } = await decodeImage(file, maxInputEdge);
   let currentCanvas = canvas;
   let currentWidth = width;

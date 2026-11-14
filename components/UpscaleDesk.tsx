@@ -15,8 +15,10 @@ import { formatFileSize, formatTime } from '@/lib/utils';
 import { track } from '@/lib/analytics';
 import { t, type Lang } from '@/lib/i18n';
 import {
+  getUpscaleLimits,
   upscaleImage,
   type UpscaleBackend,
+  type UpscaleLimits,
   type UpscaleProgress,
   type UpscaleScale,
 } from '@/lib/upscale/engine';
@@ -50,7 +52,7 @@ const COPY = {
     note:
       'The first run downloads a ~67 MB model once. Later runs reuse it from the browser cache.',
     limits:
-      'Beta: 2× accepts up to 1400 px on the long edge. 4× runs the 2× model twice and accepts up to 700 px. Output is capped at 2800 px. Transparent areas are flattened to white. WebGPU is used when available; otherwise it falls back to CPU and can be slow.',
+      'Beta: on desktop, 2× accepts up to 1400 px on the long edge and 4× accepts up to 700 px. Desktop output is capped at 2800 px; mobile devices use lower limits to avoid memory errors. Transparent areas are flattened to white. WebGPU is used when available; otherwise it falls back to CPU and can be slow.',
   },
   zh: {
     start: '开始放大',
@@ -65,7 +67,7 @@ const COPY = {
     scale: '放大倍数',
     note: '首次使用会下载约 67MB 模型，之后会复用浏览器缓存。',
     limits:
-      '测试版：2× 输入长边最大 1400px；4× 会用 2× 模型跑两遍，输入长边最大 700px。输出长边限制 2800px。透明区域会铺白。优先使用 WebGPU，不支持时会退回 CPU，速度会慢很多。',
+      '测试版：桌面端 2× 输入长边最大 1400px，4× 输入长边最大 700px；桌面输出长边限制 2800px，移动端会自动降低限制以避免内存不足。透明区域会铺白。优先使用 WebGPU，不支持时会退回 CPU，速度会慢很多。',
   },
 };
 
@@ -208,6 +210,7 @@ export default function UpscaleDesk({
   const viewedRef = useRef(false);
   const [items, setItems] = useState<Item[]>([]);
   const [scale, setScale] = useState<UpscaleScale>(2);
+  const [limits, setLimits] = useState<UpscaleLimits | undefined>(undefined);
   const [dragging, setDragging] = useState(false);
   const [running, setRunning] = useState(false);
   const [previewId, setPreviewId] = useState<string>();
@@ -230,6 +233,7 @@ export default function UpscaleDesk({
     if (viewedRef.current) return;
     viewedRef.current = true;
     track('upscale_view', { tool: 'upscale' });
+    setLimits(getUpscaleLimits());
   }, []);
 
   const addFiles = useCallback(
@@ -753,6 +757,13 @@ export default function UpscaleDesk({
         <div className="glass-effect space-y-2 p-4 text-sm text-(--muted-ink)">
           <p>{copy.note}</p>
           <p>{copy.limits}</p>
+          {limits?.mobile ? (
+            <p>
+              {lang === 'zh'
+                ? `移动端输出限制为 ${limits.maxOutputEdge}px，建议先用 2×；如果页面卡住，请换更小的图片。`
+                : `Mobile output is capped at ${limits.maxOutputEdge}px. Start with 2×; if the page freezes, use a smaller image.`}
+            </p>
+          ) : null}
         </div>
       </div>
 
